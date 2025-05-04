@@ -43,24 +43,28 @@ export default function CalendarsSection({ theme, language = "ko" }) {
 
         // 캘린더 상태 객체 생성
         const statusObj = {}
-        data.forEach((item) => {
-          statusObj[item.calendar_id] = {
-            is_active: item.is_active,
-            copy_count: item.copy_count || 0,
-          }
-        })
+        if (Array.isArray(data)) {
+          data.forEach((item) => {
+            statusObj[item.calendar_id] = {
+              is_active: item.is_active,
+              copy_count: item.copy_count || 0,
+            }
+          })
+        }
 
         setCalendarStatus(statusObj)
       } catch (error) {
         console.error("Error fetching calendar status:", error)
         // Provide default values on error
         const defaultStatus = {}
-        calendarsData.forEach((calendar) => {
-          defaultStatus[calendar.id] = {
-            is_active: true,
-            copy_count: 0,
-          }
-        })
+        if (Array.isArray(calendarsData)) {
+          calendarsData.forEach((calendar) => {
+            defaultStatus[calendar.id] = {
+              is_active: true,
+              copy_count: 0,
+            }
+          })
+        }
         setCalendarStatus(defaultStatus)
       } finally {
         setLoading(false)
@@ -136,17 +140,19 @@ export default function CalendarsSection({ theme, language = "ko" }) {
           </div>
         </div>
         <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {calendarsData.map((calendar) => (
-            <CalendarCard
-              key={calendar.id}
-              theme={theme}
-              calendar={calendar}
-              copied={copied}
-              copyToClipboard={copyToClipboard}
-              isActive={isCalendarActive(calendar.id)}
-              text={text}
-            />
-          ))}
+          {Array.isArray(calendarsData) &&
+            calendarsData.map((calendar) => (
+              <CalendarCard
+                key={calendar.id}
+                theme={theme}
+                calendar={calendar}
+                copied={copied}
+                copyToClipboard={copyToClipboard}
+                isActive={isCalendarActive(calendar.id)}
+                text={text}
+                language={language}
+              />
+            ))}
 
           {/* 문의하기 카드 */}
           <div
@@ -180,7 +186,12 @@ export default function CalendarsSection({ theme, language = "ko" }) {
   )
 }
 
-function CalendarCard({ theme, calendar, copied, copyToClipboard, isActive, text }) {
+function CalendarCard({ theme, calendar, copied, copyToClipboard, isActive, text, language }) {
+  // 현재 언어에 맞는 캘린더 제목과 설명 가져오기
+  const calendarTranslation = text.calendarItems && text.calendarItems[calendar.id]
+  const title = calendarTranslation ? calendarTranslation.title : calendar.title
+  const description = calendarTranslation ? calendarTranslation.description : calendar.description
+
   return (
     <div
       className={`rounded-lg border ${
@@ -188,8 +199,8 @@ function CalendarCard({ theme, calendar, copied, copyToClipboard, isActive, text
       } shadow-sm flex flex-col md:h-[220px] lg:h-[240px]`}
     >
       <div className="flex flex-col space-y-1.5 p-6 flex-grow">
-        <h3 className="text-2xl font-semibold leading-none tracking-tight">{calendar.title}</h3>
-        <p className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>{calendar.description}</p>
+        <h3 className="text-2xl font-semibold leading-none tracking-tight">{title}</h3>
+        <p className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>{description}</p>
       </div>
       <div className="p-6 pt-0 mt-auto">
         <button

@@ -13,9 +13,12 @@ import { getDefaultLanguage } from "@/data/languages"
 export default function Home() {
   const [theme, setTheme] = useState("light")
   const [language, setLanguage] = useState(getDefaultLanguage().code)
+  const [isClient, setIsClient] = useState(false)
 
   // Wait for component to mount to access theme and language preferences
   useEffect(() => {
+    setIsClient(true)
+
     // Check if user prefers dark mode
     if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
       setTheme("dark")
@@ -38,8 +41,10 @@ export default function Home() {
 
   // Save language preference when it changes
   useEffect(() => {
-    localStorage.setItem("language", language)
-  }, [language])
+    if (isClient) {
+      localStorage.setItem("language", language)
+    }
+  }, [language, isClient])
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark"
@@ -49,6 +54,15 @@ export default function Home() {
     } else {
       document.documentElement.classList.remove("dark")
     }
+  }
+
+  // Don't render content until client-side hydration is complete
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    )
   }
 
   return (

@@ -15,18 +15,12 @@ export const translations = {
       subscribeButton: "Subscribe to Calendar",
       howToUseButton: "How to Use",
     },
-    ja: {
-      title: "KATUSAのための\nカスタムカレンダー",
+    es: {
+      title: "Calendario personalizado\npara KATUSA",
       description:
-        "KATUSA勤務中に必要なすべての日程を一目で確認できます。訓練、休暇、重要な行事を見逃さないでください。",
-      subscribeButton: "カレンダーを購読する",
-      howToUseButton: "使用方法",
-    },
-    zh: {
-      title: "为KATUSA定制的\n日历",
-      description: "一目了然地查看KATUSA服役期间所需的所有日程。不要错过训练、假期和重要活动。",
-      subscribeButton: "订阅日历",
-      howToUseButton: "使用方法",
+        "Consulta todos los horarios que necesitas durante tu servicio KATUSA de un vistazo. No te pierdas entrenamientos, vacaciones y eventos importantes.",
+      subscribeButton: "Suscribirse al calendario",
+      howToUseButton: "Cómo usar",
     },
   },
 
@@ -42,15 +36,10 @@ export const translations = {
       title: "Benefits of KATUSA Calendar",
       description: "Efficiently manage all schedules needed during your KATUSA service.",
     },
-    ja: {
-      badge: "主な機能",
-      title: "KATUSA Calendarの利点",
-      description: "KATUSA勤務中に必要なすべての日程を効率的に管理しましょう。",
-    },
-    zh: {
-      badge: "主要功能",
-      title: "KATUSA日历的优势",
-      description: "高效管理KATUSA服役期间所需的所有日程。",
+    es: {
+      badge: "Características principales",
+      title: "Beneficios del Calendario KATUSA",
+      description: "Gestiona eficientemente todos los horarios necesarios durante tu servicio KATUSA.",
     },
   },
 
@@ -92,39 +81,21 @@ export const translations = {
         },
       ],
     },
-    ja: {
-      title: "使用方法",
-      description: "KATUSA Calendarを購読する簡単な3ステップのプロセスを確認してください。",
+    es: {
+      title: "Cómo funciona",
+      description: "Aprende sobre el sencillo proceso de 3 pasos para suscribirte al Calendario KATUSA.",
       steps: [
         {
-          title: "カレンダーを選択",
-          description: "所属部隊や必要なカレンダーを選択してください。",
+          title: "Seleccionar calendario",
+          description: "Elige el calendario para tu unidad o el que necesites.",
         },
         {
-          title: "ICSリンクをコピー",
-          description: "選択したカレンダーのICSリンクをコピーしてください。",
+          title: "Copiar enlace ICS",
+          description: "Copia el enlace ICS del calendario seleccionado.",
         },
         {
-          title: "カレンダーアプリに追加",
-          description: "コピーしたリンクをGoogle、Apple、Outlookなどのカレンダーアプリに追加してください。",
-        },
-      ],
-    },
-    zh: {
-      title: "使用方法",
-      description: "了解订阅KATUSA日历的简单三步流程。",
-      steps: [
-        {
-          title: "选择日历",
-          description: "选择您所属部队或需要的日历。",
-        },
-        {
-          title: "复制ICS链接",
-          description: "复制所选日历的ICS链接。",
-        },
-        {
-          title: "添加到日历应用",
-          description: "将复制的链接添加到Google、Apple、Outlook等日历应用中。",
+          title: "Añadir a la aplicación de calendario",
+          description: "Añade el enlace copiado a aplicaciones de calendario como Google, Apple, Outlook, etc.",
         },
       ],
     },
@@ -140,6 +111,28 @@ export const translations = {
       inquiryTitle: "원하는 달력 종류가 있나요?",
       inquiryDescription: "필요한 캘린더 종류가 없다면 문의해주세요. 추가해드리겠습니다.",
       inquiryButton: "문의하기",
+      calendarItems: {
+        basic: {
+          title: "카투사 기본",
+          description: "모든 카투사에게 필요한 기본 일정 (훈련, 중요 행사 등)",
+        },
+        kta: {
+          title: "KTA 입소/수료일정",
+          description: "KTA 입소 및 수료 관련 일정",
+        },
+        "korean-holiday": {
+          title: "한국 휴일",
+          description: "한국의 모든 공휴일 정보",
+        },
+        "korean-army": {
+          title: "한국 육군 휴일",
+          description: "한국 육군 관련 휴일 및 기념일",
+        },
+        "us-holiday": {
+          title: "미군 휴일",
+          description: "미군 기념일 및 휴일 정보",
+        },
+      },
     },
     en: {
       title: "Available Calendars",
@@ -149,24 +142,59 @@ export const translations = {
       inquiryTitle: "Looking for a specific calendar?",
       inquiryDescription: "If you don't see the calendar you need, please contact us. We'll add it for you.",
       inquiryButton: "Contact Us",
+      calendarItems: {
+        basic: {
+          title: "KATUSA Basic",
+          description: "Basic schedules needed for all KATUSA (training, important events, etc.)",
+        },
+        kta: {
+          title: "KTA Entry/Graduation Schedule",
+          description: "Schedules related to KTA entry and graduation",
+        },
+        "korean-holiday": {
+          title: "Korean Holidays",
+          description: "All Korean public holiday information",
+        },
+        "korean-army": {
+          title: "Korean Army Holidays",
+          description: "Korean Army related holidays and anniversaries",
+        },
+        "us-holiday": {
+          title: "US Military Holidays",
+          description: "US military memorial days and holidays",
+        },
+      },
     },
-    ja: {
-      title: "購読可能なカレンダー",
-      description: "必要なカレンダーを選択し、ICSリンクをコピーして購読してください。",
-      copyButton: "ICSリンクをコピー",
-      maintenanceButton: "メンテナンス中",
-      inquiryTitle: "希望のカレンダーの種類がありますか？",
-      inquiryDescription: "必要なカレンダーの種類がない場合は、お問い合わせください。追加いたします。",
-      inquiryButton: "お問い合わせ",
-    },
-    zh: {
-      title: "可订阅的日历",
-      description: "选择您需要的日历，复制ICS链接并订阅。",
-      copyButton: "复制ICS链接",
-      maintenanceButton: "维护中",
-      inquiryTitle: "需要其他类型的日历吗？",
-      inquiryDescription: "如果没有您需要的日历类型，请联系我们。我们会为您添加。",
-      inquiryButton: "联系我们",
+    es: {
+      title: "Calendarios disponibles",
+      description: "Selecciona el calendario que necesitas, copia el enlace ICS y suscríbete.",
+      copyButton: "Copiar enlace ICS",
+      maintenanceButton: "En mantenimiento",
+      inquiryTitle: "¿Buscas un calendario específico?",
+      inquiryDescription: "Si no ves el calendario que necesitas, contáctanos. Lo añadiremos para ti.",
+      inquiryButton: "Contáctanos",
+      calendarItems: {
+        basic: {
+          title: "KATUSA Básico",
+          description: "Horarios básicos necesarios para todos los KATUSA (entrenamiento, eventos importantes, etc.)",
+        },
+        kta: {
+          title: "Horario de entrada/graduación KTA",
+          description: "Horarios relacionados con la entrada y graduación de KTA",
+        },
+        "korean-holiday": {
+          title: "Festivos coreanos",
+          description: "Información sobre todos los festivos públicos coreanos",
+        },
+        "korean-army": {
+          title: "Festivos del Ejército coreano",
+          description: "Festivos y aniversarios relacionados con el Ejército coreano",
+        },
+        "us-holiday": {
+          title: "Festivos militares de EE.UU.",
+          description: "Días conmemorativos y festivos militares de EE.UU.",
+        },
+      },
     },
   },
 
@@ -180,13 +208,9 @@ export const translations = {
       title: "Frequently Asked Questions",
       description: "Answers to the most common questions about KATUSA Calendar.",
     },
-    ja: {
-      title: "よくある質問",
-      description: "KATUSA Calendarについてよく寄せられる質問への回答です。",
-    },
-    zh: {
-      title: "常见问题",
-      description: "关于KATUSA日历的常见问题解答。",
+    es: {
+      title: "Preguntas frecuentes",
+      description: "Respuestas a las preguntas más comunes sobre el Calendario KATUSA.",
     },
   },
 
@@ -200,12 +224,8 @@ export const translations = {
       copyright: "Open Source Project.",
       github: "GitHub",
     },
-    ja: {
-      copyright: "オープンソースプロジェクト。",
-      github: "GitHub",
-    },
-    zh: {
-      copyright: "开源项目。",
+    es: {
+      copyright: "Proyecto de código abierto.",
       github: "GitHub",
     },
   },
@@ -258,51 +278,41 @@ export const translations = {
       successMessage: "Your inquiry has been successfully submitted. We will respond as soon as possible.",
       errorMessage: "An error occurred while submitting your inquiry. Please try again.",
     },
-    ja: {
-      title: "お問い合わせ",
-      description: "ご質問やご提案がございましたら、以下のフォームにご記入ください。",
-      nameLabel: "お名前",
-      namePlaceholder: "お名前を入力してください",
-      emailLabel: "メールアドレス",
-      emailPlaceholder: "返信を受け取るメールアドレスを入力してください",
-      subjectLabel: "件名",
-      subjectPlaceholder: "お問い合わせの件名を入力してください",
-      typeLabel: "お問い合わせの種類",
+    es: {
+      title: "Contáctanos",
+      description: "Si tienes alguna pregunta o sugerencia, por favor completa el formulario a continuación.",
+      nameLabel: "Nombre",
+      namePlaceholder: "Ingresa tu nombre",
+      emailLabel: "Correo electrónico",
+      emailPlaceholder: "Ingresa tu dirección de correo electrónico para recibir una respuesta",
+      subjectLabel: "Asunto",
+      subjectPlaceholder: "Ingresa el asunto de tu consulta",
+      typeLabel: "Tipo de consulta",
       types: {
-        general: "一般的なお問い合わせ",
-        calendar: "カレンダー追加リクエスト",
-        bug: "バグ報告",
-        feature: "機能提案",
-        other: "その他",
+        general: "Consulta general",
+        calendar: "Solicitud de adición de calendario",
+        bug: "Reporte de error",
+        feature: "Sugerencia de función",
+        other: "Otro",
       },
-      messageLabel: "メッセージ",
-      messagePlaceholder: "お問い合わせの詳細を入力してください",
-      submitButton: "送信",
-      successMessage: "お問い合わせが正常に送信されました。できるだけ早くご返信いたします。",
-      errorMessage: "お問い合わせの送信中にエラーが発生しました。もう一度お試しください。",
+      messageLabel: "Mensaje",
+      messagePlaceholder: "Por favor proporciona detalles sobre tu consulta",
+      submitButton: "Enviar",
+      successMessage: "Tu consulta ha sido enviada con éxito. Responderemos lo antes posible.",
+      errorMessage: "Ocurrió un error al enviar tu consulta. Por favor, inténtalo de nuevo.",
     },
-    zh: {
-      title: "联系我们",
-      description: "如果您有任何问题或建议，请填写下面的表格。",
-      nameLabel: "姓名",
-      namePlaceholder: "请输入您的姓名",
-      emailLabel: "电子邮箱",
-      emailPlaceholder: "请输入接收回复的电子邮箱地址",
-      subjectLabel: "主题",
-      subjectPlaceholder: "请输入您的咨询主题",
-      typeLabel: "咨询类型",
-      types: {
-        general: "一般咨询",
-        calendar: "日历添加请求",
-        bug: "错误报告",
-        feature: "功能建议",
-        other: "其他",
-      },
-      messageLabel: "内容",
-      messagePlaceholder: "请详细描述您的咨询内容",
-      submitButton: "提交",
-      successMessage: "您的咨询已成功提交。我们将尽快回复您。",
-      errorMessage: "提交咨询时发生错误。请重试。",
+  },
+
+  // 헤더 버튼
+  header: {
+    ko: {
+      subscribeButton: "캘린더 구독하기",
+    },
+    en: {
+      subscribeButton: "Subscribe to Calendar",
+    },
+    es: {
+      subscribeButton: "Suscribirse al calendario",
     },
   },
 }

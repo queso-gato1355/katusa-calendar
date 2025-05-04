@@ -1,4 +1,4 @@
-// 캘린더 데이터 수정
+// 캘린더 데이터 수정 - 다국어 지원 추가
 export const calendarsData = [
   {
     id: "basic",
@@ -36,3 +36,9 @@ export const calendarsData = [
     type: "us-holiday",
   },
 ]
+
+// 언어에 따른 캘린더 데이터 가져오기
+export const getCalendarsByLanguage = (language) => {
+  // Since we're now using the original array structure, just return it
+  return calendarsData
+}

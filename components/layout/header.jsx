@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Calendar, Menu, X, Moon, Sun, Globe, ChevronDown } from "lucide-react"
 import { languages, getDefaultLanguage } from "@/data/languages"
+import { getTranslation } from "@/data/translations"
 
 export default function Header({ theme, toggleTheme, language, setLanguage }) {
   const [mounted, setMounted] = useState(false)
@@ -22,6 +23,9 @@ export default function Header({ theme, toggleTheme, language, setLanguage }) {
 
   // 현재 선택된 언어 정보
   const currentLanguage = languages.find((lang) => lang.code === language) || getDefaultLanguage()
+
+  // 헤더 버튼 번역 가져오기
+  const headerText = getTranslation("header", language)
 
   return (
     <>
@@ -145,7 +149,7 @@ export default function Header({ theme, toggleTheme, language, setLanguage }) {
                     : "bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500"
                 }`}
               >
-                <Link href="#calendars">캘린더 구독하기</Link>
+                <Link href="#calendars">{headerText.subscribeButton}</Link>
               </button>
             </div>
           </div>
@@ -243,7 +247,7 @@ export default function Header({ theme, toggleTheme, language, setLanguage }) {
                   setMobileMenuOpen(false)
                 }}
               >
-                캘린더 구독하기
+                {headerText.subscribeButton}
               </button>
             </div>
           </div>

@@ -152,5 +152,5 @@ export const faqData = {
 
 // 언어에 따른 FAQ 데이터 가져오기
 export const getFAQByLanguage = (language) => {
-  return faqData[language] || faqData.ko
+  return faqData[language] || faqData.ko || []
 }

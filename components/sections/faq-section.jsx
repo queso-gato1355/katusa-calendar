@@ -23,9 +23,8 @@ export default function FAQSection({ theme, language = "ko" }) {
           </div>
         </div>
         <div className="mx-auto grid max-w-5xl gap-6 py-12 grid-cols-1 lg:grid-cols-2">
-          {faqs.map((faq) => (
-            <FAQCard key={faq.id} theme={theme} question={faq.question} answer={faq.answer} />
-          ))}
+          {Array.isArray(faqs) &&
+            faqs.map((faq) => <FAQCard key={faq.id} theme={theme} question={faq.question} answer={faq.answer} />)}
         </div>
       </div>
     </section>

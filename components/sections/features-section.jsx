@@ -34,17 +34,18 @@ export default function FeaturesSection({ theme, language = "ko" }) {
         </div>
         <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {/* Feature Cards */}
-          {features.map((feature) => (
-            <FeatureCard
-              key={feature.id}
-              theme={theme}
-              icon={
-                <feature.icon className={`h-10 w-10 ${theme === "dark" ? "text-blue-400" : "text-blue-600"} mb-4`} />
-              }
-              title={feature.title}
-              description={feature.description}
-            />
-          ))}
+          {Array.isArray(features) &&
+            features.map((feature) => (
+              <FeatureCard
+                key={feature.id}
+                theme={theme}
+                icon={
+                  <feature.icon className={`h-10 w-10 ${theme === "dark" ? "text-blue-400" : "text-blue-600"} mb-4`} />
+                }
+                title={feature.title}
+                description={feature.description}
+              />
+            ))}
         </div>
       </div>
     </section>

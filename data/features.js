@@ -158,5 +158,5 @@ export const featuresData = {
 
 // 언어에 따른 기능 데이터 가져오기
 export const getFeaturesByLanguage = (language) => {
-  return featuresData[language] || featuresData.ko
+  return featuresData[language] || featuresData.ko || []
 }

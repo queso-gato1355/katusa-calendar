@@ -1,17 +1,20 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import Sidebar from "@/components/admin/sidebar"
 import toast from "react-hot-toast"
 import { Save } from "lucide-react"
 
 export default function SettingsPage() {
+  const router = useRouter()
   const [theme, setTheme] = useState("light")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [calendarSettings, setCalendarSettings] = useState([])
   const [contactEmail, setContactEmail] = useState("")
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // 테마 설정
   useEffect(() => {
@@ -21,11 +24,49 @@ export default function SettingsPage() {
     }
   }, [])
 
-  // 설정 데이터 가져오기
+  // 인증 상태 확인
   useEffect(() => {
-    fetchSettings()
+    checkAuthentication()
   }, [])
 
+  const checkAuthentication = async () => {
+    try {
+      // 세션 쿠키에서 토큰 가져오기
+      const cookies = document.cookie.split(";").reduce((acc, cookie) => {
+        const [key, value] = cookie.trim().split("=")
+        acc[key] = value
+        return acc
+      }, {})
+
+      const sessionToken = cookies["admin_session"]
+
+      if (!sessionToken) {
+        // 세션이 없으면 로그인 페이지로 리디렉션
+        router.push("/admin/login")
+        return
+      }
+
+      // 세션 검증
+      const { data, error } = await supabase.rpc("validate_admin_session", {
+        session_token: sessionToken,
+      })
+
+      if (error || !data || data.length === 0 || !data[0].is_valid) {
+        // 세션이 유효하지 않으면 로그인 페이지로 리디렉션
+        router.push("/admin/login")
+        return
+      }
+
+      // 인증 성공
+      setIsAuthenticated(true)
+      fetchSettings()
+    } catch (error) {
+      console.error("Authentication error:", error)
+      router.push("/admin/login")
+    }
+  }
+
+  // 설정 데이터 가져오기
   const fetchSettings = async () => {
     setLoading(true)
     try {
@@ -110,6 +151,15 @@ export default function SettingsPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  // 인증되지 않은 경우 로딩 표시
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
   }
 
   return (
