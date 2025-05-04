@@ -8,9 +8,26 @@ import { getTranslation } from "@/data/translations"
 import { supabase } from "@/lib/supabase"
 import { get } from "http"
 
+// id에 따른 calendar link를 supabase table에서 가져오기
+const getCalendarLink = async (id) => {
+  const { data, error } = await supabase
+    .from("calendars")
+    .select("link")
+    .eq("id", id)
+    .single()
+
+  if (error) {
+    console.error("Error fetching calendar link:", error)
+    return null
+  }
+  console.log("Fetched calendar link:", data.link)
+  return data.link || ""
+}
+
 export default function CalendarsSection({ theme, language = "ko" }) {
   const [copied, setCopied] = useState({})
   const [calendarStatus, setCalendarStatus] = useState({})
+  const [links, setLinks] = useState({})
   const [loading, setLoading] = useState(true)
 
   // 현재 언어에 맞는 텍스트 가져오기
@@ -54,6 +71,14 @@ export default function CalendarsSection({ theme, language = "ko" }) {
         }
 
         setCalendarStatus(statusObj)
+
+        // 각 캘린더별 링크 가져오기
+        const linksObj = {}
+        for (const calendar of calendarsData) {
+          const link = await getCalendarLink(calendar.id)
+          linksObj[calendar.id] = link
+        }
+        setLinks(linksObj)
       } catch (error) {
         console.error("Error fetching calendar status:", error)
         // Provide default values on error
@@ -122,22 +147,6 @@ export default function CalendarsSection({ theme, language = "ko" }) {
     return !calendarStatus[id] || calendarStatus[id].is_active !== false
   }
 
-  // type에 따른 calendar link를 supabase table에서 가져오기
-  const getCalendarLink = async (type) => {
-    const { data, error } = await supabase
-      .from("calendars")
-      .select("link")
-      .eq("type", type)
-      .single()
-
-    if (error) {
-      console.error("Error fetching calendar link:", error)
-      return null
-    }
-    return data.link
-  }
-
-
   return (
     <section
       id="calendars"
@@ -163,7 +172,7 @@ export default function CalendarsSection({ theme, language = "ko" }) {
                 key={calendar.id}
                 theme={theme}
                 calendar={calendar}
-                link={getCalendarLink(calendar.type)}
+                links={links}
                 copied={copied}
                 copyToClipboard={copyToClipboard}
                 isActive={isCalendarActive(calendar.id)}
@@ -204,7 +213,7 @@ export default function CalendarsSection({ theme, language = "ko" }) {
   )
 }
 
-function CalendarCard({ theme, calendar, link, copied, copyToClipboard, isActive, text, language }) {
+function CalendarCard({ theme, calendar, links, copied, copyToClipboard, isActive, text, language }) {
   // 현재 언어에 맞는 캘린더 제목과 설명 가져오기
   const calendarTranslation = text.calendarItems && text.calendarItems[calendar.id]
   const title = calendarTranslation ? calendarTranslation.title : calendar.title
@@ -231,7 +240,7 @@ function CalendarCard({ theme, calendar, link, copied, copyToClipboard, isActive
                 ? "bg-gray-700 text-gray-300 cursor-not-allowed"
                 : "bg-gray-200 text-gray-500 cursor-not-allowed"
           }`}
-          onClick={() => copyToClipboard(link, calendar.id)}
+          onClick={() => copyToClipboard(links[calendar.id], calendar.id)}
           disabled={!isActive}
         >
           {isActive ? (
