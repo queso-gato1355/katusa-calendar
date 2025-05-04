@@ -1,4 +1,5 @@
 // 캘린더 데이터 수정 - 다국어 지원 추가
+// 각 links는 supabase에 저장된 링크로 대체해야 함(calendars table의 link 컬럼)
 export const calendarsData = [
   {
     id: "basic",

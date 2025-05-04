@@ -6,6 +6,7 @@ import toast from "react-hot-toast"
 import { calendarsData } from "@/data/calendars"
 import { getTranslation } from "@/data/translations"
 import { supabase } from "@/lib/supabase"
+import { get } from "http"
 
 export default function CalendarsSection({ theme, language = "ko" }) {
   const [copied, setCopied] = useState({})
@@ -121,6 +122,22 @@ export default function CalendarsSection({ theme, language = "ko" }) {
     return !calendarStatus[id] || calendarStatus[id].is_active !== false
   }
 
+  // type에 따른 calendar link를 supabase table에서 가져오기
+  const getCalendarLink = async (type) => {
+    const { data, error } = await supabase
+      .from("calendars")
+      .select("link")
+      .eq("type", type)
+      .single()
+
+    if (error) {
+      console.error("Error fetching calendar link:", error)
+      return null
+    }
+    return data.link
+  }
+
+
   return (
     <section
       id="calendars"
@@ -146,6 +163,7 @@ export default function CalendarsSection({ theme, language = "ko" }) {
                 key={calendar.id}
                 theme={theme}
                 calendar={calendar}
+                link={getCalendarLink(calendar.type)}
                 copied={copied}
                 copyToClipboard={copyToClipboard}
                 isActive={isCalendarActive(calendar.id)}
@@ -186,7 +204,7 @@ export default function CalendarsSection({ theme, language = "ko" }) {
   )
 }
 
-function CalendarCard({ theme, calendar, copied, copyToClipboard, isActive, text, language }) {
+function CalendarCard({ theme, calendar, link, copied, copyToClipboard, isActive, text, language }) {
   // 현재 언어에 맞는 캘린더 제목과 설명 가져오기
   const calendarTranslation = text.calendarItems && text.calendarItems[calendar.id]
   const title = calendarTranslation ? calendarTranslation.title : calendar.title
@@ -213,7 +231,7 @@ function CalendarCard({ theme, calendar, copied, copyToClipboard, isActive, text
                 ? "bg-gray-700 text-gray-300 cursor-not-allowed"
                 : "bg-gray-200 text-gray-500 cursor-not-allowed"
           }`}
-          onClick={() => copyToClipboard(calendar.link, calendar.id)}
+          onClick={() => copyToClipboard(link, calendar.id)}
           disabled={!isActive}
         >
           {isActive ? (
