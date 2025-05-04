@@ -99,6 +99,9 @@ export default function Sidebar({ activeCalendar, theme }) {
       const data = await response.json()
 
       if (data.success) {
+        // 클라이언트 측에서 쿠키 삭제
+        document.cookie = "admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;"
+
         toast.success("로그아웃되었습니다.")
         router.push("/admin/login")
       } else {

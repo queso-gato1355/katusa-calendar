@@ -1,16 +1,29 @@
 import { NextResponse } from "next/server"
-import { logoutAdmin, getSessionCookie } from "@/lib/admin-auth"
+import { supabase } from "@/lib/supabase"
 
-export async function POST() {
+export async function POST(request) {
   try {
-    const sessionToken = getSessionCookie()
-    const result = await logoutAdmin(sessionToken)
+    const { token } = await request.json()
 
-    if (result.success) {
-      return NextResponse.json({ success: true })
-    } else {
-      return NextResponse.json({ success: false, message: result.message }, { status: 500 })
+    if (token) {
+      // 세션 삭제
+      const { error } = await supabase.from("admin_sessions").delete().eq("token", token)
+
+      if (error) {
+        throw error
+      }
     }
+
+    // 쿠키 삭제
+    const response = NextResponse.json({ success: true })
+    response.cookies.set({
+      name: "admin_session",
+      value: "",
+      expires: new Date(0),
+      path: "/",
+    })
+
+    return response
   } catch (error) {
     console.error("Logout error:", error)
     return NextResponse.json({ success: false, message: "로그아웃 중 오류가 발생했습니다." }, { status: 500 })
