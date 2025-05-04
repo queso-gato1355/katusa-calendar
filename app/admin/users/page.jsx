@@ -231,11 +231,12 @@ export default function AdminUsersPage() {
           {/* 새 관리자 추가 버튼 */}
           <button
             onClick={handleAddUser}
-            className={`px-4 py-2 rounded-md flex items-center gap-2 ${
+            className={`px-4 py-4 md:py-2 flex rounded-full md:rounded-md items-center gap-2 ${
               theme === "dark" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-blue-600 text-white hover:bg-blue-700"
             }`}
           >
-            <UserPlus className="h-4 w-4" />새 관리자 추가
+            <UserPlus className="h-8 w-8" />
+            <span className="hidden md:block">새 관리자 추가</span>
           </button>
         </div>
 
@@ -272,7 +273,7 @@ export default function AdminUsersPage() {
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-medium">사용자명</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">닉네임</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">역할</th>
+                <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">역할</th>
                 <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">생성일</th>
                 <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">생성자</th>
                 <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">최근 수정자</th>
@@ -311,7 +312,7 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm">{user.nickname || "-"}</td>
-                    <td className="px-4 py-3 text-sm">{getRoleDisplay(user.role)}</td>
+                    <td className="px-4 py-3 text-sm hidden md:table-cell">{getRoleDisplay(user.role)}</td>
                     <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(user.created_at)}</td>
                     <td className="px-4 py-3 text-sm hidden md:table-cell">{getCreatorDisplay(user)}</td>
                     <td className="px-4 py-3 text-sm hidden md:table-cell">{getUpdaterDisplay(user)}</td>

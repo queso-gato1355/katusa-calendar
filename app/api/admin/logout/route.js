@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabaseServer } from "@/lib/supabaseServer"
 
 export async function POST(request) {
   try {
@@ -7,7 +7,7 @@ export async function POST(request) {
 
     if (token) {
       // 세션 삭제
-      const { error } = await supabase.from("admin_sessions").delete().eq("token", token)
+      const { error } = await supabaseServer.from("admin_sessions").delete().eq("token", token)
 
       if (error) {
         throw error

@@ -240,7 +240,7 @@ export default function SettingsPage() {
             </div>
 
             {/* 저장 버튼 */}
-            <div className="flex justify-end">
+            <div className="flex justify-center md:justify-end">
               <button
                 onClick={handleSaveSettings}
                 disabled={saving}

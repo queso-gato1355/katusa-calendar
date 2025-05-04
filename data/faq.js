@@ -76,76 +76,42 @@ export const faqData = {
         "If there are errors in the calendar information or updates are needed, please register an issue in the GitHub repository and we will fix it quickly.",
     },
   ],
-  ja: [
+  es: [
     {
       id: "ics",
-      question: "ICSリンクとは何ですか？",
+      question: "¿Qué es un enlace ICS?",
       answer:
-        "ICS（Internet Calendar Subscription）リンクは、カレンダーデータを共有するための標準形式です。このリンクを通じて、Google、Apple、OutlookなどのカレンダーアプリでKATUSA Calendarを購読できます。",
+        "Un enlace ICS (Internet Calendar Subscription) es un formato estándar para compartir datos de calendario. A través de este enlace, puedes suscribirte al KATUSA Calendar en aplicaciones de calendario como Google, Apple, Outlook, etc.",
     },
     {
       id: "compatibility",
-      question: "どのカレンダーアプリと互換性がありますか？",
+      question: "¿Con qué aplicaciones de calendario es compatible?",
       answer:
-        "KATUSA CalendarはGoogle Calendar、Apple Calendar、Microsoft Outlook、Mozilla Thunderbirdなど、ほとんどの主要なカレンダーアプリケーションと互換性があります。",
+        "KATUSA Calendar es compatible con la mayoría de las aplicaciones de calendario principales, incluyendo Google Calendar, Apple Calendar, Microsoft Outlook, Mozilla Thunderbird, etc.",
     },
     {
       id: "updates",
-      question: "どのくらいの頻度で更新されますか？",
+      question: "¿Con qué frecuencia se actualiza?",
       answer:
-        "KATUSA Calendarは定期的に更新されます。ほとんどのカレンダーアプリはICS購読を自動的に更新するため、常に最新のスケジュールを確認できます。",
+        "KATUSA Calendar se actualiza regularmente. La mayoría de las aplicaciones de calendario actualizan automáticamente las suscripciones ICS, por lo que siempre puedes consultar el horario más reciente.",
     },
     {
       id: "free",
-      question: "本当に無料ですか？",
+      question: "¿Es realmente gratis?",
       answer:
-        "はい、KATUSA Calendarは完全に無料で提供されています。別途の登録や支払いは必要なく、すべての機能を制限なく利用できます。",
+        "Sí, KATUSA Calendar es completamente gratuito. No se requiere registro ni pago adicional, y todas las funciones se pueden utilizar sin restricciones.",
     },
     {
       id: "request",
-      question: "私の部隊のカレンダーがありません。追加してもらえますか？",
+      question: "El calendario de mi unidad no está disponible. ¿Puedes agregarlo?",
       answer:
-        "はい、継続的に新しい部隊カレンダーを追加しています。必要な部隊カレンダーがある場合は、GitHubのイシューを通じてリクエストしてください。",
+        "Sí, estamos agregando continuamente nuevos calendarios de unidades. Si necesitas un calendario de unidad específico, solicítalo a través de un problema en GitHub.",
     },
     {
       id: "error",
-      question: "カレンダー情報が間違っています。どうすればいいですか？",
+      question: "La información del calendario es incorrecta. ¿Qué debo hacer?",
       answer:
-        "カレンダー情報にエラーがあるか、更新が必要な場合は、GitHubリポジトリにイシューを登録していただければ、迅速に修正いたします。",
-    },
-  ],
-  zh: [
-    {
-      id: "ics",
-      question: "什么是ICS链接？",
-      answer:
-        "ICS（Internet Calendar Subscription）链接是共享日历数据的标准格式。通过此链接，您可以在Google、Apple、Outlook等日历应用中订阅KATUSA日历。",
-    },
-    {
-      id: "compatibility",
-      question: "与哪些日历应用兼容？",
-      answer:
-        "KATUSA日历与大多数主要日历应用兼容，包括Google Calendar、Apple Calendar、Microsoft Outlook、Mozilla Thunderbird等。",
-    },
-    {
-      id: "updates",
-      question: "更新频率如何？",
-      answer: "KATUSA日历定期更新。大多数日历应用会自动更新ICS订阅，因此您始终可以查看最新日程。",
-    },
-    {
-      id: "free",
-      question: "真的免费吗？",
-      answer: "是的，KATUSA日历完全免费提供。无需单独注册或付款，所有功能均可无限制使用。",
-    },
-    {
-      id: "request",
-      question: "没有我所在部队的日历。可以添加吗？",
-      answer: "是的，我们不断添加新的部队日历。如果您需要特定部队的日历，请通过GitHub问题提出请求。",
-    },
-    {
-      id: "error",
-      question: "日历信息不正确。我该怎么办？",
-      answer: "如果日历信息有错误或需要更新，请在GitHub存储库中注册问题，我们将快速修复。",
+        "Si hay errores en la información del calendario o se necesitan actualizaciones, regístrate en el repositorio de GitHub y lo corregiremos rápidamente.",
     },
   ],
 }

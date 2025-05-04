@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
 import { generateCalendarICS } from "@/lib/ics-generator"
+import { supabaseServer } from "@/lib/supabaseServer"
 
 // Supabase 클라이언트 생성 (서버 측)
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabase = supabaseServer
 
 export async function GET(request) {
   try {

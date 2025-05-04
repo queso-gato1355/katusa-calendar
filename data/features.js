@@ -1,4 +1,5 @@
 import { Share2, Clock, Bell, Users, Calendar, Check } from "lucide-react"
+import { escape } from "querystring"
 
 // 각 기능에 대한 데이터를 언어별로 정의
 export const featuresData = {
@@ -78,80 +79,42 @@ export const featuresData = {
       description: "All features are provided for free. No registration or payment required.",
     },
   ],
-  ja: [
+  es: [
     {
       id: "easy-subscribe",
       icon: Share2,
-      title: "簡単な購読",
-      description: "ICSリンクでGoogle、Apple、Outlookなどすべてのカレンダーアプリから簡単に購読できます。",
+      title: "Suscripción Fácil",
+      description: "Suscríbete fácilmente con enlaces ICS en cualquier aplicación de calendario como Google, Apple, Outlook, etc.",
     },
     {
       id: "auto-update",
       icon: Clock,
-      title: "自動更新",
-      description: "スケジュールが変更されると、購読したカレンダーに自動的に反映されます。",
+      title: "Actualizaciones Automáticas",
+      description: "Cuando cambian los horarios, se reflejan automáticamente en tu calendario suscrito.",
     },
     {
       id: "notifications",
       icon: Bell,
-      title: "通知設定",
-      description: "重要な訓練やイベントの通知を設定して、見逃さないようにします。",
+      title: "Notificaciones",
+      description: "Configura alertas para entrenamientos y eventos importantes para que no los pierdas.",
     },
     {
       id: "unit-specific",
       icon: Users,
-      title: "部隊別カスタムスケジュール",
-      description: "所属部隊に合わせたカスタムスケジュールを提供します。",
+      title: "Horarios Específicos de la Unidad",
+      description: "Proporciona horarios personalizados para tu unidad.",
     },
     {
       id: "holidays",
       icon: Calendar,
-      title: "韓国の祝日を含む",
-      description: "韓国の祝日と米軍の休日を両方含み、休暇計画を立てやすくします。",
+      title: "Días Festivos Coreanos Incluidos",
+      description: "Incluye tanto días festivos coreanos como días festivos militares de EE. UU. para ayudarte a planificar tus permisos.",
     },
     {
       id: "free",
       icon: Check,
-      title: "完全無料",
-      description: "すべての機能を無料で提供します。別途の登録や支払いは必要ありません。",
-    },
-  ],
-  zh: [
-    {
-      id: "easy-subscribe",
-      icon: Share2,
-      title: "简便订阅",
-      description: "通过ICS链接在Google、Apple、Outlook等所有日历应用中轻松订阅。",
-    },
-    {
-      id: "auto-update",
-      icon: Clock,
-      title: "自动更新",
-      description: "日程变更时，会自动反映在您订阅的日历中。",
-    },
-    {
-      id: "notifications",
-      icon: Bell,
-      title: "通知设置",
-      description: "设置重要训练和活动的通知，确保不会错过。",
-    },
-    {
-      id: "unit-specific",
-      icon: Users,
-      title: "部队定制日程",
-      description: "提供适合您所属部队的定制日程。",
-    },
-    {
-      id: "holidays",
-      icon: Calendar,
-      title: "包含韩国公休日",
-      description: "同时包含韩国公休日和美军假日，方便您规划休假。",
-    },
-    {
-      id: "free",
-      icon: Check,
-      title: "完全免费",
-      description: "所有功能免费提供。无需单独注册或付款。",
+      title: "Completamente Gratis",
+      description: "Todas las funciones se ofrecen de forma gratuita. No se requiere registro ni pago.",
     },
   ],
 }
