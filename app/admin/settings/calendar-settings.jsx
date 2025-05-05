@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+import { supabase, updateCalendarActiveStatus } from "@/lib/supabase"
 import toast from "react-hot-toast"
 import { Save, RefreshCw } from "lucide-react"
 
@@ -43,15 +43,12 @@ export default function CalendarSettings({ theme }) {
     try {
       // 캘린더 설정 저장
       for (const calendar of calendars) {
-        const { error } = await supabase
-          .from("calendars")
-          .update({
-            is_active: calendar.is_active,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", calendar.id)
+        const { id, is_active } = calendar
+        const { error } = await updateCalendarActiveStatus(id, is_active)
 
-        if (error) throw error
+        if (error) {
+          throw error
+        }
       }
 
       toast.success("캘린더 설정이 저장되었습니다.")

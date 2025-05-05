@@ -6,23 +6,6 @@ import toast from "react-hot-toast"
 import { calendarsData } from "@/data/calendars"
 import { getTranslation } from "@/data/translations"
 import { supabase } from "@/lib/supabase"
-import { get } from "http"
-
-// id에 따른 calendar link를 supabase table에서 가져오기
-const getCalendarLink = async (id) => {
-  const { data, error } = await supabase
-    .from("calendars")
-    .select("link")
-    .eq("id", id)
-    .single()
-
-  if (error) {
-    console.error("Error fetching calendar link:", error)
-    return null
-  }
-  console.log("Fetched calendar link:", data.link)
-  return data.link || ""
-}
 
 export default function CalendarsSection({ theme, language = "ko" }) {
   const [copied, setCopied] = useState({})
