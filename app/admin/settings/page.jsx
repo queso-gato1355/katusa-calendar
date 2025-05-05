@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import Sidebar from "@/components/admin/sidebar"
+import CalendarSettings from "./calendar-settings"
 import toast from "react-hot-toast"
 import { Save } from "lucide-react"
 
@@ -12,7 +13,6 @@ export default function SettingsPage() {
   const [theme, setTheme] = useState("light")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [calendarSettings, setCalendarSettings] = useState([])
   const [contactEmail, setContactEmail] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
@@ -70,30 +70,6 @@ export default function SettingsPage() {
   const fetchSettings = async () => {
     setLoading(true)
     try {
-      // 캘린더 설정 가져오기
-      const { data: calendarData, error: calendarError } = await supabase
-        .from("calendar_settings")
-        .select("*")
-        .order("calendar_id")
-
-      if (calendarError) throw calendarError
-
-      // 캘린더 데이터가 없는 경우 기본 데이터 생성
-      const { data: calendarsData } = await supabase.from("calendars").select("id, title")
-
-      const mergedSettings = calendarsData.map((calendar) => {
-        const existingSetting = calendarData.find((setting) => setting.calendar_id === calendar.id)
-        return (
-          existingSetting || {
-            calendar_id: calendar.id,
-            title: calendar.title,
-            is_active: true,
-            copy_count: 0,
-          }
-        )
-      })
-
-      setCalendarSettings(mergedSettings)
 
       // 연락처 이메일 가져오기
       const { data: emailData, error: emailError } = await supabase
@@ -115,27 +91,9 @@ export default function SettingsPage() {
     }
   }
 
-  const handleToggleCalendarActive = (calendarId) => {
-    setCalendarSettings((prev) =>
-      prev.map((setting) =>
-        setting.calendar_id === calendarId ? { ...setting, is_active: !setting.is_active } : setting,
-      ),
-    )
-  }
-
   const handleSaveSettings = async () => {
     setSaving(true)
     try {
-      // 캘린더 설정 저장
-      const { error: calendarError } = await supabase.from("calendar_settings").upsert(
-        calendarSettings.map(({ calendar_id, is_active, copy_count }) => ({
-          calendar_id,
-          is_active,
-          copy_count: copy_count || 0,
-        })),
-      )
-
-      if (calendarError) throw calendarError
 
       // 연락처 이메일 저장
       const { error: emailError } = await supabase
@@ -177,38 +135,7 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-8">
             {/* 캘린더 설정 섹션 */}
-            <div
-              className={`rounded-lg border ${theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"} p-6`}
-            >
-              <h2 className="text-xl font-semibold mb-4">캘린더 설정</h2>
-              <div className="space-y-4">
-                {calendarSettings.map((setting) => (
-                  <div
-                    key={setting.calendar_id}
-                    className="flex flex-col md:flex-row md:items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700"
-                  >
-                    <div className="flex-1">
-                      <h3 className="font-medium">{setting.title || setting.calendar_id}</h3>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        복사 횟수: {setting.copy_count || 0}
-                      </div>
-                    </div>
-                    <div className="mt-2 md:mt-0">
-                      <label className="inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={setting.is_active}
-                          onChange={() => handleToggleCalendarActive(setting.calendar_id)}
-                        />
-                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        <span className="ms-3 text-sm font-medium">{setting.is_active ? "활성화" : "비활성화"}</span>
-                      </label>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <CalendarSettings theme={theme} />
 
             {/* 문의 이메일 설정 섹션 */}
             <div
@@ -251,7 +178,7 @@ export default function SettingsPage() {
                 } ${saving ? "opacity-70 cursor-not-allowed" : ""}`}
               >
                 <Save className="h-4 w-4" />
-                {saving ? "저장 중..." : "설정 저장"}
+                {saving ? "저장 중..." : "이메일 설정 저장"}
               </button>
             </div>
           </div>

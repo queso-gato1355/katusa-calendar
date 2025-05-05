@@ -30,22 +30,32 @@ export async function GET(request) {
 
         // 파일 이름 생성 (예: basic.ics, kta.ics 등)
         const fileName = `${calendar.id}.ics`
+        
+        // storage_path가 없는 경우 기본값 설정
+        const storagePath = calendar.storage_path || `${calendar.id}.ics`
+
+        // 실제 저장 경로 (calendars/ 접두사 제거)
+        const actualStoragePath = storagePath.replace("calendars/", "")
 
         // Supabase Storage에 ICS 파일 저장
-        const { error: uploadError } = await supabase.storage.from("calendars").upload(fileName, icsContent, {
+        const { error: uploadError } = await supabase.storage.from("calendars").upload(actualStoragePath, icsContent, {
           contentType: "text/calendar",
           upsert: true,
         })
 
         if (uploadError) throw uploadError
 
-        // 공개 URL 가져오기
-        const { data: publicUrlData } = supabase.storage.from("calendars").getPublicUrl(fileName)
+        // 프록시 경로 설정
+        const proxyPath = `/api/calendar/${fileName}`
 
-        // 캘린더 테이블의 링크 업데이트
+        // 캘린더 테이블 업데이트
         const { error: updateError } = await supabase
           .from("calendars")
-          .update({ link: publicUrlData.publicUrl })
+          .update({
+            proxy_path: proxyPath,
+            storage_path: storagePath,
+            updated_at: new Date().toISOString(),
+          })
           .eq("id", calendar.id)
 
         if (updateError) throw updateError
@@ -53,7 +63,7 @@ export async function GET(request) {
         results.push({
           calendar: calendar.id,
           status: "success",
-          url: publicUrlData.publicUrl,
+          proxy_path: proxyPath,
         })
       } catch (error) {
         console.error(`Error processing calendar ${calendar.id}:`, error)

@@ -27,7 +27,6 @@ const getCalendarLink = async (id) => {
 export default function CalendarsSection({ theme, language = "ko" }) {
   const [copied, setCopied] = useState({})
   const [calendarStatus, setCalendarStatus] = useState({})
-  const [links, setLinks] = useState({})
   const [loading, setLoading] = useState(true)
 
   // 현재 언어에 맞는 텍스트 가져오기
@@ -72,13 +71,6 @@ export default function CalendarsSection({ theme, language = "ko" }) {
 
         setCalendarStatus(statusObj)
 
-        // 각 캘린더별 링크 가져오기
-        const linksObj = {}
-        for (const calendar of calendarsData) {
-          const link = await getCalendarLink(calendar.id)
-          linksObj[calendar.id] = link
-        }
-        setLinks(linksObj)
       } catch (error) {
         console.error("Error fetching calendar status:", error)
         // Provide default values on error
@@ -110,7 +102,10 @@ export default function CalendarsSection({ theme, language = "ko" }) {
       return
     }
 
-    navigator.clipboard.writeText(link)
+    const origin = window.location.origin
+    const calendarLink = `${origin}${link}`
+
+    navigator.clipboard.writeText(calendarLink)
     setCopied({ ...copied, [id]: true })
     toast.success("ICS 링크가 클립보드에 복사되었습니다.", {
       duration: 2000,
@@ -119,12 +114,37 @@ export default function CalendarsSection({ theme, language = "ko" }) {
 
     // 복사 카운트 증가 시도
     try {
-      // First check if the function exists
-      const { error: checkError } = await supabase.rpc("increment_copy_count", { calendar_id: id })
+      // 함수 호출 대신 직접 SQL 쿼리 사용
+      // 먼저 해당 캘린더 ID의 설정이 있는지 확인
+      const { data: existingSettings, error: checkError } = await supabase
+        .from("calendar_settings")
+        .select("*")
+        .eq("calendar_id", id)
+        .single()
 
-      if (checkError && checkError.message.includes("does not exist")) {
-        console.log("increment_copy_count function doesn't exist yet")
-        // Function doesn't exist, just update local state
+      if (checkError && checkError.code !== "PGRST116") {
+        // PGRST116는 결과가 없을 때 발생하는 에러 코드
+        throw checkError
+      }
+
+      if (existingSettings) {
+        // 기존 설정이 있으면 카운트 증가
+        const { error: updateError } = await supabase
+          .from("calendar_settings")
+          .update({ copy_count: (existingSettings.copy_count || 0) + 1 })
+          .eq("calendar_id", id)
+
+        if (updateError) throw updateError
+      } else {
+        // 기존 설정이 없으면 새로 생성
+        const { error: insertError } = await supabase
+          .from("calendar_settings")
+          .insert({ calendar_id: id, copy_count: 1, is_active: true })
+
+        if (insertError) throw insertError
+      }
+
+      // 로컬 상태 업데이트
         setCalendarStatus((prev) => ({
           ...prev,
           [id]: {
@@ -132,9 +152,6 @@ export default function CalendarsSection({ theme, language = "ko" }) {
             copy_count: (prev[id]?.copy_count || 0) + 1,
           },
         }))
-      } else if (checkError) {
-        throw checkError
-      }
     } catch (error) {
       console.error("Error incrementing copy count:", error)
     }
@@ -172,7 +189,6 @@ export default function CalendarsSection({ theme, language = "ko" }) {
                 key={calendar.id}
                 theme={theme}
                 calendar={calendar}
-                links={links}
                 copied={copied}
                 copyToClipboard={copyToClipboard}
                 isActive={isCalendarActive(calendar.id)}
@@ -213,7 +229,7 @@ export default function CalendarsSection({ theme, language = "ko" }) {
   )
 }
 
-function CalendarCard({ theme, calendar, links, copied, copyToClipboard, isActive, text, language }) {
+function CalendarCard({ theme, calendar, copied, copyToClipboard, isActive, text, language }) {
   // 현재 언어에 맞는 캘린더 제목과 설명 가져오기
   const calendarTranslation = text.calendarItems && text.calendarItems[calendar.id]
   const title = calendarTranslation ? calendarTranslation.title : calendar.title
@@ -240,7 +256,7 @@ function CalendarCard({ theme, calendar, links, copied, copyToClipboard, isActiv
                 ? "bg-gray-700 text-gray-300 cursor-not-allowed"
                 : "bg-gray-200 text-gray-500 cursor-not-allowed"
           }`}
-          onClick={() => copyToClipboard(links[calendar.id], calendar.id)}
+          onClick={() => copyToClipboard(calendar.link, calendar.id)}
           disabled={!isActive}
         >
           {isActive ? (
