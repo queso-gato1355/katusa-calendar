@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, updateCalendarActiveStatus } from "@/lib/supabase"
+import { supabase, updateCalendarActiveStatus, getCalendarActiveStatus } from "@/lib/supabase"
 import toast from "react-hot-toast"
 import { Save, RefreshCw } from "lucide-react"
 
 export default function CalendarSettings({ theme }) {
   const [calendars, setCalendars] = useState([])
+  const [calendarStatus, setCalendarStatus] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
@@ -24,6 +25,7 @@ export default function CalendarSettings({ theme }) {
       if (error) throw error
 
       setCalendars(data || [])
+
     } catch (error) {
       console.error("Error fetching calendars:", error)
       toast.error("캘린더 정보를 불러오는 중 오류가 발생했습니다.")
@@ -44,10 +46,11 @@ export default function CalendarSettings({ theme }) {
       // 캘린더 설정 저장
       for (const calendar of calendars) {
         const { id, is_active } = calendar
-        const { error } = await updateCalendarActiveStatus(id, is_active)
-
-        if (error) {
-          throw error
+        try {
+          await updateCalendarActiveStatus(id, is_active)
+        } catch (error) {
+          console.error("Error updating calendar:", error)
+          toast.error(`캘린더 ${id} 업데이트 중 오류가 발생했습니다.`)
         }
       }
 
