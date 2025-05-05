@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { generateCalendarICS } from "@/lib/ics-generator"
 import { supabaseServer } from "@/lib/supabaseServer"
+import { uploadToStorage } from "@/lib/supabase-storage"
 
 // Supabase 클라이언트 생성 (서버 측)
 const supabase = supabaseServer
@@ -38,12 +39,16 @@ export async function GET(request) {
         const actualStoragePath = storagePath.replace("calendars/", "")
 
         // Supabase Storage에 ICS 파일 저장
-        const { error: uploadError } = await supabase.storage.from("calendars").upload(actualStoragePath, icsContent, {
+        const { data: storageData, error: storageError } = await uploadToStorage("calendars", actualStoragePath, icsContent, {
           contentType: "text/calendar",
           upsert: true,
         })
 
-        if (uploadError) throw uploadError
+        if (storageData) {
+          console.log("File uploaded successfully:", storageData)
+        }
+        
+        if (storageError) throw storageError
 
         // 프록시 경로 설정
         const proxyPath = `/api/calendar/${fileName}`
@@ -59,6 +64,9 @@ export async function GET(request) {
           .eq("id", calendar.id)
 
         if (updateError) throw updateError
+
+
+        console.log(`Calendar ${calendar.id} updated successfully`)
 
         results.push({
           calendar: calendar.id,
