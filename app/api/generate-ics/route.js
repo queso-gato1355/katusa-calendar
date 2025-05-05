@@ -9,7 +9,7 @@ export async function GET(request) {
   try {
     // 인증 토큰 확인 (실제 환경에서는 더 강력한 인증 필요)
     const authHeader = request.headers.get("authorization")
-    if (!authHeader || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!authHeader || authHeader !== `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
