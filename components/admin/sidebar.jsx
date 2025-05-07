@@ -211,7 +211,28 @@ export default function Sidebar({ activeCalendar, theme }) {
         </div>
 
         <nav className="flex-1 p-4 overflow-y-auto">
-          <div className="mb-4 text-sm font-medium text-gray-500 uppercase">캘린더 관리</div>
+           {/* 캘린더 관리 섹션 바로 위에 캘린더 입력 메뉴 추가 */}
+           <div className="mb-4 text-sm font-medium text-gray-500 uppercase">캘린더 입력</div>
+           <ul className="space-y-2">
+            <li>
+              <Link
+                href="/admin/calendar-input"
+                className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+                  activeCalendar === "calendar-input"
+                    ? theme === "dark"
+                      ? "bg-blue-600 text-white"
+                      : "bg-blue-100 text-blue-800"
+                    : theme === "dark"
+                      ? "hover:bg-gray-800"
+                      : "hover:bg-gray-100"
+                }`}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                <span>캘린더 입력</span>
+              </Link>
+            </li>
+          </ul>
+          <div className="mb-4 mt-4 text-sm font-medium text-gray-500 uppercase">캘린더 관리</div>
           <ul className="space-y-2">
             {Array.isArray(calendarsData) &&
               calendarsData.map((calendar) => (
@@ -363,7 +384,29 @@ export default function Sidebar({ activeCalendar, theme }) {
             </div>
 
             <nav className="flex-1 p-4 overflow-y-auto">
-              <div className="mb-4 text-sm font-medium text-gray-500 uppercase">캘린더 관리</div>
+               {/* 모바일 메뉴에도 동일하게 추가 */}
+              <div className="mb-4 text-sm font-medium text-gray-500 uppercase">캘린더 입력</div>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="/admin/calendar-input"
+                    className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+                      activeCalendar === "calendar-input"
+                        ? theme === "dark"
+                          ? "bg-blue-600 text-white"
+                          : "bg-blue-100 text-blue-800"
+                        : theme === "dark"
+                          ? "hover:bg-gray-800"
+                          : "hover:bg-gray-100"
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    <span>캘린더 입력</span>
+                  </Link>
+                </li>
+              </ul>
+              <div className="mb-4 mt-4 text-sm font-medium text-gray-500 uppercase">캘린더 관리</div>
               <ul className="space-y-2">
                 {Array.isArray(calendarsData) &&
                   calendarsData.map((calendar) => (
