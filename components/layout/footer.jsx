@@ -22,7 +22,7 @@ export default function Footer({ theme, language = "ko" }) {
           </div>
           <div className="flex gap-4 mt-4 md:mt-0">
             <a
-              href="https://github.com"
+              href="https://github.com/queso-gato1355/katusa-calendar"
               className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
                 theme === "dark"
                   ? "border-gray-700 hover:bg-gray-800 text-white"

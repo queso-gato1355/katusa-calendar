@@ -79,7 +79,9 @@ export default function AdminLoginPage() {
             console.log("세션 쿠키가 설정되지 않았습니다. 수동으로 설정합니다.")
             document.cookie = `admin_session=${data.token}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax;`
           }
-
+          
+          // dirty fix (왜 안되는지 모르겠음)
+          router.refresh()
           router.push("/admin")
         }, 500)
       } else {
