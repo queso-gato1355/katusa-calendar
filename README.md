@@ -4,17 +4,22 @@ KATUSA Calendar는 카투사 복무 중 필요한 모든 일정을 한 눈에 �
 
 ## 목차
 
-- [개요](#개요)
-- [기능](#기능)
-- [기술 스택](#기술-스택)
-- [프로젝트 구조](#프로젝트-구조)
-- [설치 및 실행](#설치-및-실행)
-- [환경 변수](#환경-변수)
-- [개발 가이드](#개발-가이드)
-- [배포](#배포)
-- [기여 방법](#기여-방법)
-- [To-Do 리스트](#to-do-리스트)
-- [라이센스](#라이센스)
+- [KATUSA Calendar Project](#katusa-calendar-project)
+  - [목차](#목차)
+  - [개요](#개요)
+  - [기능](#기능)
+  - [기술 스택](#기술-스택)
+  - [프로젝트 구조](#프로젝트-구조)
+  - [설치 및 실행](#설치-및-실행)
+  - [환경 변수](#환경-변수)
+  - [개발 가이드](#개발-가이드)
+    - [코드 스타일](#코드-스타일)
+    - [브랜치 전략](#브랜치-전략)
+    - [커밋 메시지 규칙](#커밋-메시지-규칙)
+  - [배포](#배포)
+  - [기여 방법](#기여-방법)
+  - [To-Do 리스트](#to-do-리스트)
+  - [라이센스](#라이센스)
 
 ## 개요
 
@@ -25,7 +30,7 @@ KATUSA Calendar는 카투사 복무 중 필요한 다양한 일정(휴가, 훈�
 - **캘린더 구독**: 다양한 카테고리의 일정을 ICS 형식으로 구독
 - **웹 캘린더 뷰**: 웹에서 직접 일정 확인
 - **관리자 대시보드**: 일정 관리, 사용자 관리, 설정 등
-- **다국어 지원**: 한국어, 영어 지원
+- **다국어 지원**: 한국어, 영어, 스페인어(에스파냐어) 지원
 - **다크 모드**: 사용자 환경에 맞는 테마 제공
 
 ## 기술 스택
@@ -38,7 +43,7 @@ KATUSA Calendar는 카투사 복무 중 필요한 다양한 일정(휴가, 훈�
 
 ## 프로젝트 구조
 
-\`\`\`
+```
 katusa-calendar/
 ├── app/                    # Next.js App Router
 │   ├── admin/              # 관리자 페이지
@@ -81,28 +86,28 @@ katusa-calendar/
 ├── package.json            # 패키지 정보
 ├── tailwind.config.js      # Tailwind CSS 설정
 └── vercel.json             # Vercel 배포 설정
-\`\`\`
+```
 
 ## 설치 및 실행
 
 1. 저장소 클론:
-   \`\`\`bash
+   ```bash
    git clone https://github.com/your-username/katusa-calendar.git
    cd katusa-calendar
-   \`\`\`
+   ```
 
 2. 의존성 설치:
-   \`\`\`bash
+   ```bash
    npm install
-   \`\`\`
+   ```
 
 3. 환경 변수 설정:
    `.env.local` 파일을 생성하고 필요한 환경 변수 설정 (아래 환경 변수 섹션 참조)
 
 4. 개발 서버 실행:
-   \`\`\`bash
+   ```bash
    npm run dev
-   \`\`\`
+   ```
 
 5. 브라우저에서 `http://localhost:3000` 접속
 
@@ -110,7 +115,7 @@ katusa-calendar/
 
 프로젝트 실행을 위해 다음 환경 변수가 필요합니다:
 
-\`\`\`
+```
 # Supabase 설정
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
@@ -124,7 +129,7 @@ ADMIN_PASSWORD_SALT=your-admin-password-salt
 # CRON 작업 설정
 CRON_SECRET=your-cron-secret
 NEXT_PUBLIC_CRON_SECRET=your-cron-secret
-\`\`\`
+```
 
 ## 개발 가이드
 
@@ -137,13 +142,13 @@ NEXT_PUBLIC_CRON_SECRET=your-cron-secret
 ### 브랜치 전략
 
 - `main`: 프로덕션 브랜치
-- `develop`: 개발 브랜치
+- `development`: 개발 브랜치
 - 기능 개발: `feature/기능-이름`
 - 버그 수정: `bugfix/버그-이름`
 
 ### 커밋 메시지 규칙
 
-\`\`\`
+```
 feat: 새로운 기능 추가
 fix: 버그 수정
 docs: 문서 수정
@@ -151,7 +156,7 @@ style: 코드 포맷팅, 세미콜론 누락 등 (코드 변경 없음)
 refactor: 코드 리팩토링
 test: 테스트 코드 추가
 chore: 빌드 프로세스 또는 보조 도구 변경
-\`\`\`
+```
 
 ## 배포
 
@@ -160,6 +165,7 @@ chore: 빌드 프로세스 또는 보조 도구 변경
 1. Vercel에 GitHub 저장소 연결
 2. 환경 변수 설정
 3. 배포 설정 확인 후 배포
+4. Supabase 접근 시 보안 문제 확인 필수!
 
 ## 기여 방법
 
@@ -186,4 +192,3 @@ chore: 빌드 프로세스 또는 보조 도구 변경
 ## 라이센스
 
 이 프로젝트는 MIT 라이센스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
-\`\`\`
