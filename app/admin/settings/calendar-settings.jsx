@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, updateCalendarActiveStatus, getCalendarActiveStatus } from "@/lib/supabase"
+import { supabase, updateCalendarActiveStatus } from "@/lib/supabase"
 import toast from "react-hot-toast"
 import { Save, RefreshCw } from "lucide-react"
 
@@ -25,7 +25,6 @@ export default function CalendarSettings({ theme }) {
       if (error) throw error
 
       setCalendars(data || [])
-
     } catch (error) {
       console.error("Error fetching calendars:", error)
       toast.error("캘린더 정보를 불러오는 중 오류가 발생했습니다.")

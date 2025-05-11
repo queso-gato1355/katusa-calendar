@@ -31,7 +31,7 @@ export async function GET(request) {
 
         // 파일 이름 생성 (예: basic.ics, kta.ics 등)
         const fileName = `${calendar.id}.ics`
-        
+
         // storage_path가 없는 경우 기본값 설정
         const storagePath = calendar.storage_path || `${calendar.id}.ics`
 
@@ -39,15 +39,20 @@ export async function GET(request) {
         const actualStoragePath = storagePath.replace("calendars/", "")
 
         // Supabase Storage에 ICS 파일 저장
-        const { data: storageData, error: storageError } = await uploadToStorage("calendars", actualStoragePath, icsContent, {
-          contentType: "text/calendar",
-          upsert: true,
-        })
+        const { data: storageData, error: storageError } = await uploadToStorage(
+          "calendars",
+          actualStoragePath,
+          icsContent,
+          {
+            contentType: "text/calendar",
+            upsert: true,
+          },
+        )
 
         if (storageData) {
           console.log("File uploaded successfully:", storageData)
         }
-        
+
         if (storageError) throw storageError
 
         // 프록시 경로 설정
@@ -64,7 +69,6 @@ export async function GET(request) {
           .eq("id", calendar.id)
 
         if (updateError) throw updateError
-
 
         console.log(`Calendar ${calendar.id} updated successfully`)
 

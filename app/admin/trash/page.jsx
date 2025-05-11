@@ -92,7 +92,7 @@ export default function TrashPage() {
   }
 
   const handlePermanentDelete = async (event) => {
-    if (!window.confirm("정말로 이 일정을 영구적으로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return
+    if (!window.confirm("정말로 이 일정을 영구적으로 삭제하시겠습니까? 이 ���업은 되돌릴 수 없습니다.")) return
 
     try {
       // 일정 영구 삭제

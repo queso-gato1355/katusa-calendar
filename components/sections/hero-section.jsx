@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Calendar } from "lucide-react"
 import { getTranslation } from "@/data/translations"
+import { useRouter } from "next/navigation"
 
 export default function HeroSection({ theme, language = "ko" }) {
+  const router = useRouter()
   const [currentImage, setCurrentImage] = useState(0)
   const images = ["/KATUSA.jpg", "/KATUSA2.jpg", "/KATUSA3.jpg"]
 
@@ -40,7 +42,8 @@ export default function HeroSection({ theme, language = "ko" }) {
                 {text.description}
               </p>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2">
+              {/* 파란색 버튼 */}
               <button
                 className={`h-11 px-8 rounded-md inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   theme === "dark"
@@ -52,6 +55,8 @@ export default function HeroSection({ theme, language = "ko" }) {
                 {text.subscribeButton}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </button>
+
+              {/* 회색 테두리 버튼 */}
               <button
                 className={`h-11 px-8 rounded-md inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   theme === "dark"
@@ -61,6 +66,18 @@ export default function HeroSection({ theme, language = "ko" }) {
                 onClick={() => document.getElementById("how-it-works").scrollIntoView({ behavior: "smooth" })}
               >
                 {text.howToUseButton}
+              </button>
+
+              {/* 초록색 버튼 */}
+              <button
+                className={`h-11 px-8 rounded-md inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                  theme === "dark"
+                    ? "bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-500"
+                    : "bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-500"
+                } sm:col-span-2`}
+                onClick={() => router.push("/calendar")}
+              >
+                <Calendar className="mr-2 h-4 w-4" />웹 달력 보기
               </button>
             </div>
           </div>

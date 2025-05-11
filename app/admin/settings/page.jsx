@@ -70,7 +70,6 @@ export default function SettingsPage() {
   const fetchSettings = async () => {
     setLoading(true)
     try {
-
       // 연락처 이메일 가져오기
       const { data: emailData, error: emailError } = await supabase
         .from("site_settings")
@@ -94,7 +93,6 @@ export default function SettingsPage() {
   const handleSaveSettings = async () => {
     setSaving(true)
     try {
-
       // 연락처 이메일 저장
       const { error: emailError } = await supabase
         .from("site_settings")

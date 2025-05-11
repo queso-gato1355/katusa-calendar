@@ -1,5 +1,4 @@
 import { Share2, Clock, Bell, Users, Calendar, Check } from "lucide-react"
-import { escape } from "querystring"
 
 // 각 기능에 대한 데이터를 언어별로 정의
 export const featuresData = {
@@ -84,7 +83,8 @@ export const featuresData = {
       id: "easy-subscribe",
       icon: Share2,
       title: "Suscripción Fácil",
-      description: "Suscríbete fácilmente con enlaces ICS en cualquier aplicación de calendario como Google, Apple, Outlook, etc.",
+      description:
+        "Suscríbete fácilmente con enlaces ICS en cualquier aplicación de calendario como Google, Apple, Outlook, etc.",
     },
     {
       id: "auto-update",
@@ -108,7 +108,8 @@ export const featuresData = {
       id: "holidays",
       icon: Calendar,
       title: "Días Festivos Coreanos Incluidos",
-      description: "Incluye tanto días festivos coreanos como días festivos militares de EE. UU. para ayudarte a planificar tus permisos.",
+      description:
+        "Incluye tanto días festivos coreanos como días festivos militares de EE. UU. para ayudarte a planificar tus permisos.",
     },
     {
       id: "free",

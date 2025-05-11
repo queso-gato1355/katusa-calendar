@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { fetchEvents, saveEvent, softDeleteEvent } from "@/lib/supabase-helpers"
 import { calendarsData } from "@/data/calendars"
+import { getThemeStyles } from "@/data/admin-ui"
 import Sidebar from "@/components/admin/sidebar"
 import EventTable from "@/components/admin/event-table"
 import EventForm from "@/components/admin/event-form"
 import AddButton from "@/components/admin/add-button"
 import toast from "react-hot-toast"
+import { supabaseClient } from "@/lib/supabaseClient"
 
 export default function AdminPage() {
   const searchParams = useSearchParams()
@@ -18,6 +20,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [currentEvent, setCurrentEvent] = useState(null)
+  const [selectedEvents, setSelectedEvents] = useState([])
   const [pagination, setPagination] = useState({
     page: 1,
     perPage: 10,
@@ -43,30 +46,27 @@ export default function AdminPage() {
 
   // 일정 데이터 가져오기
   useEffect(() => {
-    fetchEvents()
+    fetchCalendarEvents()
+    // 페이지나 캘린더가 변경되면 선택된 이벤트 초기화
+    setSelectedEvents([])
   }, [activeCalendar, pagination.page, pagination.perPage])
 
-  const fetchEvents = async () => {
+  const fetchCalendarEvents = async () => {
     setLoading(true)
     try {
       const { from, to } = getPaginationRange()
 
       // 선택된 캘린더 타입에 맞는 이벤트 가져오기
-      const {
-        data: events,
-        error,
-        count,
-      } = await supabase
-        .from("events")
-        .select("*", { count: "exact" })
-        .eq("category", currentCalendarInfo.type)
-        .eq("is_disabled", false)
-        .order("start_at", { ascending: false })
-        .range(from, to)
+      const { data, count } = await fetchEvents({
+        category: currentCalendarInfo.type,
+        isDisabled: false,
+        page: pagination.page,
+        perPage: pagination.perPage,
+        orderBy: "start_at",
+        ascending: false,
+      })
 
-      if (error) throw error
-
-      setEvents(events || [])
+      setEvents(data || [])
       setPagination((prev) => ({ ...prev, total: count || 0 }))
     } catch (error) {
       console.error("Error fetching events:", error)
@@ -105,15 +105,12 @@ export default function AdminPage() {
 
     try {
       // 소프트 딜리트: is_disabled를 true로 설정
-      const { error } = await supabase
-        .from("events")
-        .update({ is_disabled: true, updated_at: new Date().toISOString() })
-        .eq("id", event.id)
+      const { success, error } = await softDeleteEvent(event.id)
 
-      if (error) throw error
+      if (!success) throw error
 
       toast.success("일정이 휴지통으로 이동되었습니다.")
-      fetchEvents()
+      fetchCalendarEvents()
     } catch (error) {
       console.error("Error deleting event:", error)
       toast.error("일정 삭제 중 오류가 발생했습니다.")
@@ -122,51 +119,77 @@ export default function AdminPage() {
 
   const handleSaveEvent = async (eventData) => {
     try {
-      // 이벤트 데이터에서 필요한 필드만 추출
-      const { id, title, description, start_at, end_at, location, all_day } = eventData
+      const { success, error } = await saveEvent(eventData, currentCalendarInfo.type)
 
-      // 저장할 데이터 객체 생성
-      const eventToSave = {
-        title,
-        description,
-        start_at,
-        end_at,
-        location,
-        all_day,
-        updated_at: new Date().toISOString(),
-      }
+      if (!success) throw error
 
-      let result
-
-      if (id) {
-        // 기존 일정 수정
-        result = await supabase.from("events").update(eventToSave).eq("id", id)
-
-        toast.success("일정이 수정되었습니다.")
-      } else {
-        // 새 일정 추가
-        result = await supabase.from("events").insert({
-          ...eventToSave,
-          category: currentCalendarInfo.type,
-          is_disabled: false,
-          created_at: new Date().toISOString(),
-        })
-
-        toast.success("새 일정이 추가되었습니다.")
-      }
-
-      if (result.error) throw result.error
-
+      toast.success(eventData.id ? "일정이 수정되었습니다." : "새 일정이 추가되었습니다.")
       setIsFormOpen(false)
-      fetchEvents()
+      fetchCalendarEvents()
     } catch (error) {
       console.error("Error saving event:", error)
       toast.error("일정 저장 중 오류가 발생했습니다.")
     }
   }
 
+  // 전체 선택/해제 핸들러
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      // 현재 페이지의 모든 이벤트 ID 선택
+      setSelectedEvents(events.map((event) => event.id))
+    } else {
+      // 모든 선택 해제
+      setSelectedEvents([])
+    }
+  }
+
+  // 개별 항목 선택/해제 핸들러
+  const handleSelectItem = (eventId) => {
+    setSelectedEvents((prev) => {
+      if (prev.includes(eventId)) {
+        // 이미 선택된 경우 선택 해제
+        return prev.filter((id) => id !== eventId)
+      } else {
+        // 선택되지 않은 경우 선택 추가
+        return [...prev, eventId]
+      }
+    })
+  }
+
+  // 선택된 항목 삭제 핸들러
+  const handleDeleteSelected = async () => {
+    if (selectedEvents.length === 0) return
+    if (!window.confirm(`선택한 ${selectedEvents.length}개의 일정을 삭제하시겠습니까? (휴지통으로 이동됩니다)`)) return
+
+    try {
+      setLoading(true)
+      // 선택된 모든 이벤트를 소프트 딜리트
+      const { error } = await supabaseClient
+        .from("events")
+        .update({
+          is_disabled: true,
+          updated_at: new Date().toISOString(),
+        })
+        .in("id", selectedEvents)
+
+      if (error) throw error
+
+      toast.success(`${selectedEvents.length}개의 일정이 휴지통으로 이동되었습니다.`)
+      setSelectedEvents([])
+      fetchCalendarEvents()
+    } catch (error) {
+      console.error("Error deleting selected events:", error)
+      toast.error("일정 삭제 중 오류가 발생했습니다.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 테마 스타일 가져오기
+  const styles = getThemeStyles(theme)
+
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+    <div className={`min-h-screen ${styles.container}`}>
       <Sidebar activeCalendar={activeCalendar} theme={theme} />
 
       <div className="md:ml-64 p-4 md:p-8">
@@ -184,6 +207,10 @@ export default function AdminPage() {
           pagination={pagination}
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}
+          selectedItems={selectedEvents}
+          onSelectAll={handleSelectAll}
+          onSelectItem={handleSelectItem}
+          onDeleteSelected={handleDeleteSelected}
         />
       </div>
 

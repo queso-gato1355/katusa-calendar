@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { X, Save, Trash2 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { supabaseClient } from "@/lib/supabaseClient"
 import { hashPassword } from "@/lib/admin-auth"
 import toast from "react-hot-toast"
 
@@ -67,7 +67,7 @@ export default function AdminUserModal({ isOpen, onClose, user, currentUser, onS
       const userData = {
         username: formData.username,
         nickname: formData.nickname,
-        role: formData.role,
+        role: isSuperAdmin ? formData.role : "admin", // 슈퍼 관리자만 역할 변경 가능
       }
 
       // 비밀번호가 입력된 경우에만 해싱하여 추가
@@ -89,7 +89,7 @@ export default function AdminUserModal({ isOpen, onClose, user, currentUser, onS
         userData.updated_by = currentUser.id
 
         // 기존 사용자 업데이트
-        const { error } = await supabase.from("admin_users").update(userData).eq("id", user.id)
+        const { error } = await supabaseClient.from("admin_users").update(userData).eq("id", user.id)
 
         if (error) throw error
 
@@ -106,7 +106,7 @@ export default function AdminUserModal({ isOpen, onClose, user, currentUser, onS
         userData.created_by = currentUser.id
         userData.created_at = new Date().toISOString()
 
-        const { error } = await supabase.from("admin_users").insert(userData)
+        const { error } = await supabaseClient.from("admin_users").insert(userData)
 
         if (error) {
           if (error.code === "23505") {
@@ -137,7 +137,7 @@ export default function AdminUserModal({ isOpen, onClose, user, currentUser, onS
     setIsDeleting(true)
     try {
       // 관리자 계정 비활성화
-      const { error } = await supabase.from("admin_users").update({ is_active: false }).eq("id", user.id)
+      const { error } = await supabaseClient.from("admin_users").update({ is_active: false }).eq("id", user.id)
 
       if (error) throw error
 
@@ -262,6 +262,26 @@ export default function AdminUserModal({ isOpen, onClose, user, currentUser, onS
                   <option value="super_admin">슈퍼 관리자</option>
                 </select>
                 {isSelfEdit && <p className="text-xs text-gray-500 mt-1">자신의 역할은 변경할 수 없습니다.</p>}
+              </div>
+            )}
+            {!isSuperAdmin && (
+              <div>
+                <label htmlFor="role" className="block text-sm font-medium mb-1">
+                  역할
+                </label>
+                <input
+                  type="text"
+                  id="role-display"
+                  value="일반 관리자"
+                  disabled
+                  className={`w-full rounded-md border px-3 py-2 opacity-60 ${
+                    theme === "dark"
+                      ? "bg-gray-800 border-gray-700 text-white"
+                      : "bg-white border-gray-300 text-gray-900"
+                  }`}
+                />
+                <input type="hidden" name="role" value="admin" />
+                <p className="text-xs text-gray-500 mt-1">일반 관리자만 생성할 수 있습니다.</p>
               </div>
             )}
           </div>

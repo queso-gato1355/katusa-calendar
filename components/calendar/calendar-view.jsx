@@ -137,7 +137,7 @@ export default function CalendarView({ theme, language = "ko" }) {
     )
   }
 
-  // 이벤트 카테고리에 따른 색상 가져오기
+  // 이벤트 카테고리에 따��� 색상 가져오기
   const getEventColor = (category) => {
     switch (category) {
       case "basic":
