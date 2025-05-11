@@ -1,5 +1,8 @@
 "use client"
+
+import { useState } from "react"
 import { Edit, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+import { formatDate } from "@/lib/utils"
 
 export default function EventTable({
   events,
@@ -10,48 +13,31 @@ export default function EventTable({
   pagination,
   onPageChange,
   onPerPageChange,
-  renderCustomActions,
+  selectedItems = [],
+  onSelectAll,
+  onSelectItem,
+  onDeleteSelected,
 }) {
-  const { page, perPage, total } = pagination
-  const totalPages = Math.ceil(total / perPage)
+  const [selectMode, setSelectMode] = useState(false)
 
-  const perPageOptions = [10, 50, 100]
+  // 전체 선택 상태 확인
+  const allSelected = events.length > 0 && selectedItems.length === events.length
 
-  // 날짜를 사용자 친화적인 형식으로 포맷팅하는 함수
-  const formatDateTime = (dateString) => {
-    if (!dateString) return "-"
-
-    try {
-      // 날짜 객체 생성 (이미 타임존 정보가 포함되어 있음)
-      const date = new Date(dateString)
-
-      // 유효한 날짜인지 확인
-      if (isNaN(date.getTime())) return "-"
-
-      // 년, 월, 일 포맷팅
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, "0")
-      const day = String(date.getDate()).padStart(2, "0")
-
-      // 시간, 분 포맷팅 (24시간제, 네 자리 숫자)
-      const hours = String(date.getHours()).padStart(2, "0")
-      const minutes = String(date.getMinutes()).padStart(2, "0")
-      const timeStr = `${hours}${minutes}`
-
-      // "YYYY년 MM월 DD일 HHMM" 형식으로 반환
-      return `${year}년 ${month}월 ${day}일 ${timeStr}`
-    } catch (error) {
-      console.error("Date formatting error:", error)
-      return "-"
+  // 선택 모드 토글
+  const toggleSelectMode = () => {
+    setSelectMode(!selectMode)
+    if (selectMode) {
+      // 선택 모드를 끌 때 선택된 항목 초기화
+      onSelectAll(false)
     }
   }
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="space-y-4">
       {/* Table Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
         <div className="text-sm">
-          총 <span className="font-medium">{total}</span>개의 일정
+          총 <span className="font-medium">{pagination.total}</span>개의 일정
         </div>
         <div className="flex items-center gap-2">
           <label htmlFor="perPage" className="text-sm">
@@ -59,13 +45,13 @@ export default function EventTable({
           </label>
           <select
             id="perPage"
-            value={perPage}
+            value={pagination.perPage}
             onChange={(e) => onPerPageChange(Number(e.target.value))}
             className={`rounded-md border px-2 py-1 text-sm ${
               theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300 text-gray-900"
             }`}
           >
-            {perPageOptions.map((option) => (
+            {[5, 10, 20, 50].map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
@@ -74,14 +60,53 @@ export default function EventTable({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="w-full overflow-x-auto rounded-lg border border-inherit">
+      {/* Action Buttons */}
+      <div className="flex justify-between items-center mb-4">
+        <button
+          onClick={toggleSelectMode}
+          className={`px-4 py-2 rounded-md text-sm ${
+            theme === "dark"
+              ? selectMode
+                ? "bg-blue-600 text-white"
+                : "bg-gray-700 text-white"
+              : selectMode
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-800"
+          }`}
+        >
+          {selectMode ? "선택 완료" : "선택 삭제"}
+        </button>
+
+        {selectMode && selectedItems.length > 0 && (
+          <button
+            onClick={onDeleteSelected}
+            className={`px-4 py-2 rounded-md text-sm ${
+              theme === "dark" ? "bg-red-600 text-white" : "bg-red-600 text-white"
+            }`}
+          >
+            선택 항목 삭제 ({selectedItems.length}개)
+          </button>
+        )}
+      </div>
+
+      {/* 일정 목록 테이블 */}
+      <div className="w-full overflow-hidden rounded-lg border border-inherit">
         <table className="w-full">
           <thead className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-50"}`}>
             <tr>
+              {selectMode && (
+                <th className="px-4 py-3 w-10">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={(e) => onSelectAll(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                </th>
+              )}
               <th className="px-4 py-3 text-left text-sm font-medium">제목</th>
-              <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">시작 일시</th>
-              <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">종료 일시</th>
+              <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">시작일</th>
+              <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">종료일</th>
               <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">위치</th>
               <th className="px-4 py-3 text-right text-sm font-medium">작업</th>
             </tr>
@@ -89,60 +114,50 @@ export default function EventTable({
           <tbody className="divide-y divide-inherit">
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center">
+                <td colSpan={selectMode ? 6 : 5} className="px-4 py-8 text-center">
                   로딩 중...
                 </td>
               </tr>
             ) : events.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center">
+                <td colSpan={selectMode ? 6 : 5} className="px-4 py-8 text-center">
                   일정이 없습니다.
                 </td>
               </tr>
             ) : (
               events.map((event) => (
-                <tr
-                  key={event.id}
-                  className={`${theme === "dark" ? "hover:bg-gray-800" : "hover:bg-gray-50"} cursor-pointer`}
-                  onClick={() => onEdit(event)}
-                >
-                  <td className="px-4 py-3 text-sm">
-                    <div className="flex flex-col md:hidden">
-                      <span className="font-medium">{event.title}</span>
-                      <span className="text-xs text-gray-500 mt-1">
-                        {formatDateTime(event.start_at).split(" ")[0]} {/* 모바일에서는 날짜만 표시 */}
-                      </span>
-                    </div>
-                    <span className="hidden md:inline">{event.title}</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDateTime(event.start_at)}</td>
-                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDateTime(event.end_at)}</td>
+                <tr key={event.id} className={`${theme === "dark" ? "hover:bg-gray-800" : "hover:bg-gray-50"}`}>
+                  {selectMode && (
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(event.id)}
+                        onChange={() => onSelectItem(event.id)}
+                        className="rounded border-gray-300"
+                      />
+                    </td>
+                  )}
+                  <td className="px-4 py-3 text-sm font-medium">{event.title}</td>
+                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(event.start_at)}</td>
+                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(event.end_at)}</td>
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{event.location || "-"}</td>
                   <td className="px-4 py-3 text-sm text-right">
-                    {renderCustomActions ? (
-                      renderCustomActions(event)
-                    ) : (
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onEdit(event)
-                          }}
-                          className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onDelete(event)
-                          }}
-                          className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => onEdit(event)}
+                        className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
+                        title="수정"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => onDelete(event)}
+                        className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
+                        title="삭제"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -154,12 +169,14 @@ export default function EventTable({
       {/* Pagination */}
       <div className="flex justify-between items-center mt-4">
         <div className="text-sm">
-          {total > 0 ? `${(page - 1) * perPage + 1}-${Math.min(page * perPage, total)} / ${total}` : "0 결과"}
+          {pagination.total > 0
+            ? `${(pagination.page - 1) * pagination.perPage + 1}-${Math.min(pagination.page * pagination.perPage, pagination.total)} / ${pagination.total}`
+            : "0 결과"}
         </div>
         <div className="flex gap-1">
           <button
             onClick={() => onPageChange(1)}
-            disabled={page === 1}
+            disabled={pagination.page === 1}
             className={`p-1 rounded-md ${
               theme === "dark" ? "hover:bg-gray-800 disabled:text-gray-700" : "hover:bg-gray-100 disabled:text-gray-300"
             } disabled:cursor-not-allowed`}
@@ -167,8 +184,8 @@ export default function EventTable({
             <ChevronsLeft className="h-5 w-5" />
           </button>
           <button
-            onClick={() => onPageChange(page - 1)}
-            disabled={page === 1}
+            onClick={() => onPageChange(pagination.page - 1)}
+            disabled={pagination.page === 1}
             className={`p-1 rounded-md ${
               theme === "dark" ? "hover:bg-gray-800 disabled:text-gray-700" : "hover:bg-gray-100 disabled:text-gray-300"
             } disabled:cursor-not-allowed`}
@@ -178,13 +195,13 @@ export default function EventTable({
 
           <div className="flex items-center px-2">
             <span className="text-sm">
-              {page} / {totalPages || 1}
+              {pagination.page} / {Math.ceil(pagination.total / pagination.perPage) || 1}
             </span>
           </div>
 
           <button
-            onClick={() => onPageChange(page + 1)}
-            disabled={page >= totalPages}
+            onClick={() => onPageChange(pagination.page + 1)}
+            disabled={pagination.page >= Math.ceil(pagination.total / pagination.perPage)}
             className={`p-1 rounded-md ${
               theme === "dark" ? "hover:bg-gray-800 disabled:text-gray-700" : "hover:bg-gray-100 disabled:text-gray-300"
             } disabled:cursor-not-allowed`}
@@ -192,8 +209,8 @@ export default function EventTable({
             <ChevronRight className="h-5 w-5" />
           </button>
           <button
-            onClick={() => onPageChange(totalPages)}
-            disabled={page >= totalPages}
+            onClick={() => onPageChange(Math.ceil(pagination.total / pagination.perPage))}
+            disabled={pagination.page >= Math.ceil(pagination.total / pagination.perPage)}
             className={`p-1 rounded-md ${
               theme === "dark" ? "hover:bg-gray-800 disabled:text-gray-700" : "hover:bg-gray-100 disabled:text-gray-300"
             } disabled:cursor-not-allowed`}

@@ -1,9 +1,9 @@
-import { supabase } from "@/lib/supabase"
+import { supabaseClient } from "@/lib/supabaseClient"
 
 // 캘린더 데이터를 Supabase에서 가져오는 함수
 export async function fetchCalendarsFromSupabase() {
   try {
-    const { data, error } = await supabase.from("calendars").select("*").order("id")
+    const { data, error } = await supabaseClient.from("calendars").select("*").order("id")
 
     if (error) throw error
 

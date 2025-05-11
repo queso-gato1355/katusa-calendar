@@ -18,10 +18,14 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentHoliday, setCurrentHoliday] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
+  const [selectedHolidays, setSelectedHolidays] = useState([])
   const [formData, setFormData] = useState({
     year: new Date().getFullYear(),
     month: 1,
     day: 1,
+    endYear: new Date().getFullYear(),
+    endMonth: 1,
+    endDay: 1,
     title: "",
     us_observed: false,
     rok_observed: false,
@@ -57,10 +61,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       const categories = ["us-holiday", "korean-army", "basic"]
 
       // 기본 쿼리 설정
-      let query = supabase
-        .from("events")
-        .select("*", { count: "exact" })
-        .in("category", categories)
+      let query = supabase.from("events").select("*", { count: "exact" }).in("category", categories)
 
       // 검색어 필터 적용
       if (filter.search) {
@@ -99,6 +100,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
         if (!holidaysByDate[dateKey]) {
           holidaysByDate[dateKey] = {
             date: event.start_at,
+            end_date: event.end_at,
             title: title,
             us_observed: false,
             rok_observed: false,
@@ -128,6 +130,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       // 날짜별 그룹화된 데이터를 배열로 변환
       const formattedHolidays = Object.values(holidaysByDate).map((holiday) => {
         const date = new Date(holiday.date)
+        const endDate = new Date(holiday.end_date)
         return {
           ...holiday,
           day_of_week: getDayOfWeek(date.getFullYear(), date.getMonth() + 1, date.getDate()),
@@ -201,11 +204,16 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
   const openModal = (holiday = null) => {
     if (holiday) {
       // 수정 모드
-      const date = new Date(holiday.date)
+      const startDate = new Date(holiday.date)
+      const endDate = new Date(holiday.end_date)
+
       setFormData({
-        year: date.getFullYear(),
-        month: date.getMonth() + 1,
-        day: date.getDate(),
+        year: startDate.getFullYear(),
+        month: startDate.getMonth() + 1,
+        day: startDate.getDate(),
+        endYear: endDate.getFullYear(),
+        endMonth: endDate.getMonth() + 1,
+        endDay: endDate.getDate(),
         title: holiday.title,
         us_observed: holiday.us_observed,
         rok_observed: holiday.rok_observed,
@@ -216,10 +224,14 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       setIsEditing(true)
     } else {
       // 추가 모드
+      const now = new Date()
       setFormData({
-        year: new Date().getFullYear(),
-        month: 1,
-        day: 1,
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+        day: now.getDate(),
+        endYear: now.getFullYear(),
+        endMonth: now.getMonth() + 1,
+        endDay: now.getDate(),
         title: "",
         us_observed: false,
         rok_observed: false,
@@ -247,20 +259,26 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
     }
 
     try {
-      const date = new Date(formData.year, formData.month - 1, formData.day)
+      // 시작 날짜 설정
+      const startDate = new Date(formData.year, formData.month - 1, formData.day, 0, 0, 0)
+
+      // 종료 날짜 설정
+      const endDate = new Date(formData.endYear, formData.endMonth - 1, formData.endDay, 23, 59, 59)
+
+      // 종료 날짜가 시작 날짜보다 이전인 경우
+      if (endDate < startDate) {
+        toast.error("종료 날짜는 시작 날짜보다 이후여야 합니다.")
+        return
+      }
 
       // 유효한 날짜인지 확인
-      if (isNaN(date.getTime())) {
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         toast.error(text.invalidDate || "유효하지 않은 날짜입니다.")
         return
       }
 
       // 이벤트 생성 또는 업데이트를 위한 배열
       const events = []
-
-      // 종료 날짜 (하루 종일 이벤트)
-      const endDate = new Date(date)
-      endDate.setDate(date.getDate() + 1)
 
       // 기존 이벤트 삭제 (수정 모드인 경우)
       if (isEditing && currentHoliday) {
@@ -278,7 +296,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       if (formData.us_observed) {
         events.push({
           title: formData.title,
-          start_at: date.toISOString(),
+          start_at: startDate.toISOString(),
           end_at: endDate.toISOString(),
           category: "us-holiday",
           all_day: true,
@@ -292,7 +310,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       if (formData.rok_observed) {
         events.push({
           title: formData.title,
-          start_at: date.toISOString(),
+          start_at: startDate.toISOString(),
           end_at: endDate.toISOString(),
           category: "korean-army",
           all_day: true,
@@ -306,7 +324,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       if (formData.katusa_observed) {
         events.push({
           title: formData.title,
-          start_at: date.toISOString(),
+          start_at: startDate.toISOString(),
           end_at: endDate.toISOString(),
           category: "basic",
           all_day: true,
@@ -320,7 +338,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       if (formData.usfk_only) {
         events.push({
           title: `${formData.title} (USFK Only)`,
-          start_at: date.toISOString(),
+          start_at: startDate.toISOString(),
           end_at: endDate.toISOString(),
           category: "basic",
           all_day: true,
@@ -372,43 +390,98 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
     }
   }
 
-  // 일정 저장 함수 (ICS 파일 재생성)
-  const saveToCalendars = async () => {
+  // 선택된 항목 삭제 핸들러
+  const handleDeleteSelected = async () => {
+    if (selectedHolidays.length === 0) return
+    if (!window.confirm(`선택한 ${selectedHolidays.length}개의 휴일을 삭제하시겠습니까?`)) return
+
     try {
       setLoading(true)
-
-      // ICS 파일 재생성 API 호출
-      try {
-        const { data: settingsData } = await supabase
-          .from("site_settings")
-          .select("value")
-          .eq("key", "cron_secret")
-          .single()
-
-        const cronSecret = settingsData?.value || process.env.NEXT_PUBLIC_CRON_SECRET || "default-secret"
-
-        const response = await fetch("/api/generate-ics", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${cronSecret}`,
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error("ICS 파일 재생성에 실패했습니다.")
+      // 선택된 모든 이벤트 ID 수집
+      const eventIds = []
+      selectedHolidays.forEach((holidayId) => {
+        const holiday = holidays.find((h) => h.id === holidayId)
+        if (holiday && holiday.events) {
+          holiday.events.forEach((event) => {
+            eventIds.push(event.id)
+          })
         }
+      })
 
-        toast.success(text.regenerateSuccess || "ICS 파일이 재생성되었습니다.")
-      } catch (icsError) {
-        console.error("Error regenerating ICS files:", icsError)
-        toast.error(text.regenerateError || "ICS 파일 재생성 중 오류가 발생했습니다.")
+      // 이벤트 삭제
+      if (eventIds.length > 0) {
+        const { error } = await supabase.from("events").delete().in("id", eventIds)
+        if (error) throw error
       }
+
+      toast.success(`${selectedHolidays.length}개의 휴일이 삭제되었습니다.`)
+      setSelectedHolidays([])
+      fetchHolidays()
     } catch (error) {
-      console.error("Error saving to calendars:", error)
-      toast.error(text.saveError || "캘린더 저장 중 오류가 발생했습니다.")
+      console.error("Error deleting selected holidays:", error)
+      toast.error("휴일 삭제 중 오류가 발생했습니다.")
     } finally {
       setLoading(false)
     }
+  }
+
+  // 전체 삭제 핸들러
+  const handleDeleteAll = async () => {
+    if (!window.confirm("모든 휴일을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return
+
+    try {
+      setLoading(true)
+      // 현재 필터에 해당하는 모든 이벤트 삭제
+      const categories = ["us-holiday", "korean-army", "basic"]
+
+      // 기본 쿼리 설정
+      let query = supabase.from("events").delete().in("category", categories)
+
+      // 연도 필터 적용
+      if (filter.year) {
+        const startDate = new Date(Number.parseInt(filter.year), 0, 1).toISOString()
+        const endDate = new Date(Number.parseInt(filter.year), 11, 31).toISOString()
+        query = query.gte("start_at", startDate).lte("start_at", endDate)
+      }
+
+      const { error } = await query
+
+      if (error) throw error
+
+      toast.success("모든 휴일이 삭제되었습니다.")
+      setSelectedHolidays([])
+      fetchHolidays()
+    } catch (error) {
+      console.error("Error deleting all holidays:", error)
+      toast.error("휴일 삭제 중 오류가 발생했습니다.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 전체 선택/해제 핸들러
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      // 현재 페이지의 모든 휴일 ID 선택
+      setSelectedHolidays(holidays.map((holiday) => holiday.id))
+    } else {
+      // 모든 선택 해제
+      setSelectedHolidays([])
+    }
+  }
+
+  // 개별 항목 선택/해제 핸들러
+  const handleSelectItem = (e, holidayId) => {
+    e.stopPropagation()
+    setSelectedHolidays((prev) => {
+      if (prev.includes(holidayId)) {
+        // 이미 선택된 경우 선택 해제
+        return prev.filter((id) => id !== holidayId)
+      } else {
+        // 선택되지 않은 경우 선택 추가
+        return [...prev, holidayId]
+      }
+    })
   }
 
   // 연도 옵션 생성
@@ -424,7 +497,12 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
             <Plus className="h-4 w-4 mr-2" />
             {text.addHoliday || "새 휴일 추가"}
           </Button>
-          <Button variant="default" onClick={saveToCalendars} disabled={loading || holidays.length === 0}>
+          <Button
+            variant="default"
+            onClick={saveToCalendars}
+            disabled={loading || holidays.length === 0}
+            className={`${theme === "dark" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"}`}
+          >
             <Check className="h-4 w-4 mr-2" />
             {text.regenerateICS || "ICS 파일 재생성"}
           </Button>
@@ -461,10 +539,21 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
               ))}
             </select>
           </div>
-          <div className="flex items-end">
+          <div className="flex items-end gap-2">
             <Button variant="secondary" onClick={resetFilters}>
               필터 초기화
             </Button>
+            {/* 삭제 버튼 추가 */}
+            {selectedHolidays.length > 0 && (
+              <Button variant="destructive" onClick={handleDeleteSelected}>
+                선택 삭제 ({selectedHolidays.length})
+              </Button>
+            )}
+            {holidays.length > 0 && (
+              <Button variant="destructive" onClick={handleDeleteAll}>
+                전체 삭제
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -472,8 +561,17 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       {/* 테이블 */}
       <div className="w-full overflow-x-auto rounded-lg border">
         <table className="w-full">
-          <thead className="bg-muted">
+          <thead className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-50"}`}>
             <tr>
+              {/* 체크박스 열 추가 */}
+              <th className="px-4 py-3 text-left text-sm font-medium w-10">
+                <input
+                  type="checkbox"
+                  checked={selectedHolidays.length === holidays.length && holidays.length > 0}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+              </th>
               <th className="px-4 py-3 text-left text-sm font-medium">{text.date || "날짜"}</th>
               <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">
                 {text.dayOfWeek || "요일"}
@@ -493,13 +591,13 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
           <tbody className="divide-y">
             {loading ? (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center">
+                <td colSpan={9} className="px-4 py-8 text-center">
                   {text.loading || "로딩 중..."}
                 </td>
               </tr>
             ) : holidays.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center">
+                <td colSpan={9} className="px-4 py-8 text-center">
                   {text.noHolidays || "등록된 휴일이 없습니다."}
                 </td>
               </tr>
@@ -508,6 +606,16 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
                 const date = new Date(holiday.date)
                 return (
                   <tr key={holiday.id} className="hover:bg-muted/50 cursor-pointer" onClick={() => openModal(holiday)}>
+                    {/* 체크박스 셀 추가 */}
+                    <td className="px-4 py-3 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedHolidays.includes(holiday.id)}
+                        onChange={(e) => handleSelectItem(e, holiday.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex flex-col md:hidden">
                         <span className="font-medium">{holiday.title}</span>
@@ -524,22 +632,46 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
                     <td className="px-4 py-3 text-sm hidden md:table-cell">{holiday.day_of_week}</td>
                     <td className="px-4 py-3 text-sm hidden md:table-cell">{holiday.title}</td>
                     <td className="px-4 py-3 text-sm text-center hidden md:table-cell">
-                      <Badge variant={holiday.us_observed ? "success" : "destructive"}>
+                      <Badge
+                        variant={holiday.us_observed ? "success" : "destructive"}
+                        className={
+                          holiday.us_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                        }
+                      >
                         {holiday.us_observed ? text.yes || "Yes" : text.no || "No"}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-sm text-center hidden md:table-cell">
-                      <Badge variant={holiday.rok_observed ? "success" : "destructive"}>
+                      <Badge
+                        variant={holiday.rok_observed ? "success" : "destructive"}
+                        className={
+                          holiday.rok_observed
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : ""
+                        }
+                      >
                         {holiday.rok_observed ? text.yes || "Yes" : text.no || "No"}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-sm text-center hidden md:table-cell">
-                      <Badge variant={holiday.katusa_observed ? "success" : "destructive"}>
+                      <Badge
+                        variant={holiday.katusa_observed ? "success" : "destructive"}
+                        className={
+                          holiday.katusa_observed
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : ""
+                        }
+                      >
                         {holiday.katusa_observed ? text.yes || "Yes" : text.no || "No"}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-sm text-center hidden md:table-cell">
-                      <Badge variant={holiday.usfk_only ? "default" : "outline"}>
+                      <Badge
+                        variant={holiday.usfk_only ? "default" : "outline"}
+                        className={
+                          holiday.usfk_only ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                        }
+                      >
                         {holiday.usfk_only ? text.yes || "Yes" : text.no || "No"}
                       </Badge>
                     </td>
@@ -604,7 +736,13 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
           </div>
 
           <div className="flex gap-1">
-            <Button variant="outline" size="icon" onClick={() => handlePageChange(1)} disabled={pagination.page === 1}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(1)}
+              disabled={pagination.page === 1}
+              className={theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-700 hover:text-black"}
+            >
               <ChevronsLeft className="h-4 w-4" />
             </Button>
             <Button
@@ -642,7 +780,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
 
       {/* 모달 */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className={theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}>
           <DialogHeader>
             <DialogTitle>
               {isEditing ? text.editHoliday || "휴일 수정" : text.addNewHoliday || "새 휴일 추가"}
@@ -650,46 +788,113 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            {/* 날짜 입력 */}
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <Label htmlFor="year">{text.year || "연도"} *</Label>
-                <Input
-                  type="number"
-                  id="year"
-                  name="year"
-                  value={formData.year}
-                  onChange={handleChange}
-                  min="2000"
-                  max="2100"
-                  required
-                />
+            {/* 시작 날짜 입력 */}
+            <div>
+              <Label>시작 날짜</Label>
+              <div className="grid grid-cols-3 gap-2 mt-1">
+                <div>
+                  <Label htmlFor="year" className="sr-only">
+                    {text.year || "연도"} *
+                  </Label>
+                  <Input
+                    type="number"
+                    id="year"
+                    name="year"
+                    value={formData.year}
+                    onChange={handleChange}
+                    min="2000"
+                    max="2100"
+                    placeholder="연도"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="month" className="sr-only">
+                    {text.month || "월"} *
+                  </Label>
+                  <Input
+                    type="number"
+                    id="month"
+                    name="month"
+                    value={formData.month}
+                    onChange={handleChange}
+                    min="1"
+                    max="12"
+                    placeholder="월"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="day" className="sr-only">
+                    {text.day || "일"} *
+                  </Label>
+                  <Input
+                    type="number"
+                    id="day"
+                    name="day"
+                    value={formData.day}
+                    onChange={handleChange}
+                    min="1"
+                    max="31"
+                    placeholder="일"
+                    required
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="month">{text.month || "월"} *</Label>
-                <Input
-                  type="number"
-                  id="month"
-                  name="month"
-                  value={formData.month}
-                  onChange={handleChange}
-                  min="1"
-                  max="12"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="day">{text.day || "일"} *</Label>
-                <Input
-                  type="number"
-                  id="day"
-                  name="day"
-                  value={formData.day}
-                  onChange={handleChange}
-                  min="1"
-                  max="31"
-                  required
-                />
+            </div>
+
+            {/* 종료 날짜 입력 */}
+            <div>
+              <Label>종료 날짜</Label>
+              <div className="grid grid-cols-3 gap-2 mt-1">
+                <div>
+                  <Label htmlFor="endYear" className="sr-only">
+                    {text.year || "연도"} *
+                  </Label>
+                  <Input
+                    type="number"
+                    id="endYear"
+                    name="endYear"
+                    value={formData.endYear}
+                    onChange={handleChange}
+                    min="2000"
+                    max="2100"
+                    placeholder="연도"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endMonth" className="sr-only">
+                    {text.month || "월"} *
+                  </Label>
+                  <Input
+                    type="number"
+                    id="endMonth"
+                    name="endMonth"
+                    value={formData.endMonth}
+                    onChange={handleChange}
+                    min="1"
+                    max="12"
+                    placeholder="월"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endDay" className="sr-only">
+                    {text.day || "일"} *
+                  </Label>
+                  <Input
+                    type="number"
+                    id="endDay"
+                    name="endDay"
+                    value={formData.endDay}
+                    onChange={handleChange}
+                    min="1"
+                    max="31"
+                    placeholder="일"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
@@ -725,6 +930,9 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
                   pressed={formData.us_observed}
                   onPressedChange={() => handleToggle("us_observed")}
                   variant="outline"
+                  className={
+                    formData.us_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                  }
                 >
                   {formData.us_observed ? text.yes || "Yes" : text.no || "No"}
                 </Toggle>
@@ -736,6 +944,9 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
                   pressed={formData.rok_observed}
                   onPressedChange={() => handleToggle("rok_observed")}
                   variant="outline"
+                  className={
+                    formData.rok_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                  }
                 >
                   {formData.rok_observed ? text.yes || "Yes" : text.no || "No"}
                 </Toggle>
@@ -747,6 +958,9 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
                   pressed={formData.katusa_observed}
                   onPressedChange={() => handleToggle("katusa_observed")}
                   variant="outline"
+                  className={
+                    formData.katusa_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                  }
                 >
                   {formData.katusa_observed ? text.yes || "Yes" : text.no || "No"}
                 </Toggle>
@@ -758,6 +972,9 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
                   pressed={formData.usfk_only}
                   onPressedChange={() => handleToggle("usfk_only")}
                   variant="outline"
+                  className={
+                    formData.usfk_only ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                  }
                 >
                   {formData.usfk_only ? text.yes || "Yes" : text.no || "No"}
                 </Toggle>
@@ -789,4 +1006,39 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       </Dialog>
     </div>
   )
+}
+
+// 일정 저장 함수 (ICS 파일 재생성)
+const saveToCalendars = async () => {
+  try {
+    // ICS 파일 재생성 API 호출
+    try {
+      const { data: settingsData } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "cron_secret")
+        .single()
+
+      const cronSecret = settingsData?.value || process.env.NEXT_PUBLIC_CRON_SECRET || "default-secret"
+
+      const response = await fetch("/api/generate-ics", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${cronSecret}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("ICS 파일 재생성에 실패했습니다.")
+      }
+
+      toast.success("ICS 파일이 재생성되었습니다.")
+    } catch (icsError) {
+      console.error("Error regenerating ICS files:", icsError)
+      toast.error("ICS 파일 재생성 중 오류가 발생했습니다.")
+    }
+  } catch (error) {
+    console.error("Error saving to calendars:", error)
+    toast.error("캘린더 저장 중 오류가 발생했습니다.")
+  }
 }

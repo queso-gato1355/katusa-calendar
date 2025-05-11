@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast"
 export const metadata = {
   title: "KATUSA Calendar",
   description: "카투사 복무 중 필요한 모든 일정을 한 눈에 확인하세요.",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({ children }) {

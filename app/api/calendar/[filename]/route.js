@@ -1,10 +1,5 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-
-// Supabase 클라이언트 생성 (서버 측)
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+import { supabaseAdmin } from "@/lib/supabaseAdmin"
 
 export async function GET(request, context) {
   try {
@@ -15,7 +10,7 @@ export async function GET(request, context) {
     const calendarId = filename.replace(".ics", "")
 
     // 캘린더 정보 조회
-    const { data: calendar, error: calendarError } = await supabase
+    const { data: calendar, error: calendarError } = await supabaseAdmin
       .from("calendars")
       .select("*")
       .eq("id", calendarId)
@@ -35,7 +30,7 @@ export async function GET(request, context) {
     const storagePath = calendar.storage_path || `calendars/${calendarId}.ics`
 
     // Supabase Storage에서 ICS 파일 다운로드
-    const { data: fileData, error: fileError } = await supabase.storage
+    const { data: fileData, error: fileError } = await supabaseAdmin.storage
       .from("calendars") // 버킷 이름
       .download(storagePath.replace("calendars/", "")) // 'calendars/' 접두사 제거
 

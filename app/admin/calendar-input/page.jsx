@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { validateAdminSession } from "@/lib/supabase-helpers"
 import Sidebar from "@/components/admin/sidebar"
 import FiscalYearForm from "@/components/admin/fiscal-year-form"
+import { getThemeStyles } from "@/data/admin-ui"
 
 export default function CalendarInputPage() {
   const router = useRouter()
@@ -43,11 +44,9 @@ export default function CalendarInputPage() {
       }
 
       // 세션 검증
-      const { data, error } = await supabase.rpc("validate_admin_session", {
-        session_token: sessionToken,
-      })
+      const { isValid } = await validateAdminSession(sessionToken)
 
-      if (error || !data || data.length === 0 || !data[0].is_valid) {
+      if (!isValid) {
         // 세션이 유효하지 않으면 로그인 페이지로 리디렉션
         router.push("/admin/login")
         return
@@ -71,8 +70,11 @@ export default function CalendarInputPage() {
     )
   }
 
+  // 테마 스타일 가져오기
+  const styles = getThemeStyles(theme)
+
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+    <div className={`min-h-screen ${styles.container}`}>
       <Sidebar activeCalendar="calendar-input" theme={theme} />
 
       <div className="md:ml-64 p-4 md:p-8">

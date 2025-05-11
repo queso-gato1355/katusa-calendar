@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Calendar, Menu, Moon, Sun, Globe, ChevronDown } from "lucide-react"
 import { languages, getDefaultLanguage } from "@/data/languages"
@@ -9,9 +10,10 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
-export default function Header({ theme, toggleTheme, language, setLanguage }) {
+export default function Header({ theme, onThemeChange, language, setLanguage }) {
   const [mounted, setMounted] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const router = useRouter();
 
   // Wait for component to mount to access theme
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function Header({ theme, toggleTheme, language, setLanguage }) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/40">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Left section - Logo and Menu Button */}
@@ -47,7 +49,7 @@ export default function Header({ theme, toggleTheme, language, setLanguage }) {
               <SheetContent side="left">
                 <SheetHeader>
                   <SheetTitle>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
                       <Calendar className="h-6 w-6 text-primary" />
                       <span className="text-xl font-bold">KATUSA Calendar</span>
                     </div>
@@ -161,7 +163,7 @@ export default function Header({ theme, toggleTheme, language, setLanguage }) {
             </DropdownMenu>
 
             {/* Theme Toggle */}
-            <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={headerText.themeToggle}>
+            <Button variant="ghost" size="icon" onClick={onThemeChange} aria-label={headerText.themeToggle}>
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
