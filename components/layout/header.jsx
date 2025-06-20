@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Calendar, Menu, Moon, Sun, Globe, ChevronDown } from "lucide-react"
+import { Calendar, Menu, Moon, Sun, Globe, ChevronDown, CalendarPlus } from "lucide-react"
 import { languages, getDefaultLanguage } from "@/data/languages"
 import { getTranslation } from "@/data/translations"
 import { Button } from "@/components/ui/button"
@@ -49,7 +49,7 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
               <SheetContent side="left">
                 <SheetHeader>
                   <SheetTitle>
-                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
+                    <div className="flex items-center gap-2">
                       <Calendar className="h-6 w-6 text-primary" />
                       <span className="text-xl font-bold">KATUSA Calendar</span>
                     </div>
@@ -128,14 +128,15 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
               </SheetContent>
             </Sheet>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
               <Calendar className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">KATUSA Calendar</span>
+              <span className="text-xl font-bold hidden md:block">KATUSA Calendar</span>
+              <span className="text-xl font-bold md:hidden">KATUSA</span>
             </div>
           </div>
 
           {/* Right section - Buttons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -167,8 +168,11 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
-            <Button onClick={() => document.getElementById("calendars").scrollIntoView({ behavior: "smooth" })}>
-              {headerText.subscribeButton}
+            <Button className="border rounded-full" onClick={() => document.getElementById("calendars").scrollIntoView({ behavior: "smooth" })}>
+              <span className="hidden md:block">{headerText.subscribeButton}</span>
+              <span className="md:hidden">
+                <CalendarPlus className="h-5 w-5" />
+              </span>
             </Button>
           </div>
         </div>
