@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase"
+import { supabaseClient } from "@/lib/supabaseClient"
 import { getTranslation } from "@/data/translations"
 import { ArrowLeft, Send } from "lucide-react"
 import toast from "react-hot-toast"
@@ -20,6 +20,8 @@ export default function ContactPage() {
     type: "general",
     message: "",
   })
+
+  const supabase = supabaseClient
 
   // 현재 언어에 맞는 텍스트 가져오기
   const text = getTranslation("contact", language)
