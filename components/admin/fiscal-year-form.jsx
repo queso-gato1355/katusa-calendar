@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Edit, Trash2, Plus, Check, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import toast from "react-hot-toast"
-import { supabase } from "@/lib/supabase"
+import { supabaseClient } from "@/lib/supabaseClient"
 import { getTranslation } from "@/data/translations"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -32,6 +32,8 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
     katusa_observed: false,
     usfk_only: false,
   })
+
+  const supabase = supabaseClient
 
   // 페이지네이션 상태 추가
   const [pagination, setPagination] = useState({
@@ -510,7 +512,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       </div>
 
       {/* 필터 섹션 */}
-      <div className={`mb-4 p-4 bg-muted rounded-lg ${theme === "dark" ? "bg-gray-800" : "bg-gray-50"}`}>
+      <div className={`mb-4 p-4 rounded-lg ${theme === "dark" ? "bg-gray-800" : "bg-gray-50"}`}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Label htmlFor="search">검색어</Label>
@@ -572,11 +574,12 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium">{text.date || "날짜"}</th>
+              <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">{text.date || "날짜"}</th>
+              <th className="px-4 py-3 text-left text-sm font-medium table-cell md:aria-hidden:">{"제목 및 날짜"}</th>
               <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">
                 {text.dayOfWeek || "요일"}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium">{text.title || "제목"}</th>
+              <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">{text.title || "제목"}</th>
               <th className="px-4 py-3 text-center text-sm font-medium hidden md:table-cell">{text.us || "US"}</th>
               <th className="px-4 py-3 text-center text-sm font-medium hidden md:table-cell">{text.rok || "ROK"}</th>
               <th className="px-4 py-3 text-center text-sm font-medium hidden md:table-cell">
@@ -605,7 +608,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
               holidays.map((holiday) => {
                 const date = new Date(holiday.date)
                 return (
-                  <tr key={holiday.id} className="hover:bg-muted/50 cursor-pointer" onClick={() => openModal(holiday)}>
+                  <tr key={holiday.id} className="hover:bg-gray-600/20 cursor-pointer" onClick={() => openModal(holiday)}>
                     {/* 체크박스 셀 추가 */}
                     <td className="px-4 py-3 text-sm">
                       <input

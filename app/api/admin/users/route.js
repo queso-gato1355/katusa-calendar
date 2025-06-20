@@ -55,4 +55,14 @@ export async function POST(request) {
     
     if (error) {
       if (error.code === "23505") {
-        return NextResponse.json({ error: "이미 사용\
+        return NextResponse.json({ error: "이미 사용 중인 이메일입니다." }, { status: 409 })
+      }
+      return NextResponse.json({ error: "사용자 생성 중 오류가 발생했습니다." }, { status: 500 })
+    }
+
+    return NextResponse.json({ user: data[0] }, { status: 201 })
+  } catch (error) {
+    console.error("Error creating user:", error)
+    return NextResponse.json({ error: "사용자 생성 중 오류가 발생했습니다." }, { status: 500 })
+  }
+}

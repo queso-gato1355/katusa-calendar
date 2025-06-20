@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Edit, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
-import { formatDate } from "@/lib/utils"
 
 export default function EventTable({
   events,
@@ -30,6 +29,18 @@ export default function EventTable({
       // 선택 모드를 끌 때 선택된 항목 초기화
       onSelectAll(false)
     }
+  }
+
+  // 날짜 포맷 함수
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
   return (

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { supabaseClient } from "@/lib/supabaseClient"
 import toast from "react-hot-toast"
 import { getTranslation } from "@/data/translations"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,8 @@ export default function CalendarView({ theme, language = "ko" }) {
   const [loading, setLoading] = useState(true)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [showEventDetails, setShowEventDetails] = useState(false)
+
+  const supabase = supabaseClient
 
   // 현재 언어에 맞는 텍스트 가져오기
   const text = getTranslation("calendarPage", language)
