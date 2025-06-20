@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { supabaseClient } from "@/lib/supabaseClient"
 import Sidebar from "@/components/admin/sidebar"
 import CalendarSettings from "./calendar-settings"
 import toast from "react-hot-toast"
@@ -15,6 +15,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [contactEmail, setContactEmail] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  const supabase = supabaseClient
 
   // 테마 설정
   useEffect(() => {

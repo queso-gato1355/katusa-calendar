@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+import { supabaseClient } from "@/lib/supabaseClient"
 import Sidebar from "@/components/admin/sidebar"
 import EventTable from "@/components/admin/event-table"
 import toast from "react-hot-toast"
@@ -16,6 +16,8 @@ export default function TrashPage() {
     perPage: 10,
     total: 0,
   })
+
+  const supabase = supabaseClient
 
   // 테마 설정
   useEffect(() => {

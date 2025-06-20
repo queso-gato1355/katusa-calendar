@@ -1,16 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, updateCalendarActiveStatus } from "@/lib/supabase"
+import { supabaseClient } from "@/lib/supabaseClient"
+import { updateCalendarActiveStatus } from "@/lib/supabase-helpers"
 import toast from "react-hot-toast"
 import { Save, RefreshCw } from "lucide-react"
 
 export default function CalendarSettings({ theme }) {
   const [calendars, setCalendars] = useState([])
-  const [calendarStatus, setCalendarStatus] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
+
+  const supabase = supabaseClient
 
   // 캘린더 데이터 가져오기
   useEffect(() => {

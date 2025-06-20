@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { supabaseClient } from "@/lib/supabaseClient"
 import Sidebar from "@/components/admin/sidebar"
 import AdminUserModal from "@/components/admin/admin-user-modal"
 import toast from "react-hot-toast"
@@ -22,6 +22,8 @@ export default function AdminUsersPage() {
     perPage: 10,
     total: 0,
   })
+
+  const supabase = supabaseClient
 
   // 테마 설정
   useEffect(() => {
