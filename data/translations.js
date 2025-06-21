@@ -417,9 +417,11 @@ export const translations = {
   admin: {
     ko: {
       fiscalYear: {
-        title: "Fiscal Year 휴일 관리",
+        title_fiscal: "Fiscal Year 휴일 관리",
         addHoliday: "새 휴일 추가",
+        addHoliday_short: "추가",
         regenerateICS: "ICS 파일 재생성",
+        regenerateICS_short: "재생성",
         loading: "로딩 중...",
         noHolidays: "등록된 휴일이 없습니다.",
         date: "날짜",
@@ -458,9 +460,11 @@ export const translations = {
     },
     en: {
       fiscalYear: {
-        title: "Fiscal Year Holiday Management",
+        title_fiscal: "Fiscal Year Holiday Management",
         addHoliday: "Add New Holiday",
+        addHoliday_short: "Add",
         regenerateICS: "Regenerate ICS Files",
+        regenerateICS_short: "Regenerate",
         loading: "Loading...",
         noHolidays: "No holidays registered.",
         date: "Date",
@@ -499,9 +503,11 @@ export const translations = {
     },
     es: {
       fiscalYear: {
-        title: "Gestión de Festivos del Año Fiscal",
+        title_fiscal: "Gestión de Festivos del Año Fiscal",
         addHoliday: "Añadir Nuevo Festivo",
+        addHoliday_short: "Añadir",
         regenerateICS: "Regenerar Archivos ICS",
+        regenerateICS_short: "Regenerar",
         loading: "Cargando...",
         noHolidays: "No hay festivos registrados.",
         date: "Fecha",
