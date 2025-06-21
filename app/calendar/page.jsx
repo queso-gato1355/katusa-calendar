@@ -69,10 +69,16 @@ export default function CalendarPage() {
     <div
       className={`flex min-h-screen flex-col ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-white text-gray-900"}`}
     >
-      <Header theme={theme} toggleTheme={toggleTheme} language={language} setLanguage={setLanguage} />
+      <Header
+        theme={theme}
+        toggleTheme={toggleTheme}
+        language={language}
+        setLanguage={setLanguage}
+        onThemeChange={toggleTheme}
+      />
       <main className="flex-1 container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">{text.title}</h1>
-        <p className="mb-6">{text.description}</p>
+        <p className="mb-6">{text.subtitle}</p>
         <CalendarView theme={theme} language={language} />
       </main>
       <Footer theme={theme} language={language} />
