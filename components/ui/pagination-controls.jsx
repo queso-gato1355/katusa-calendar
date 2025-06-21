@@ -21,7 +21,7 @@ export function PaginationControls({
 
       <div className="flex items-center gap-2">
         <div className="flex items-center mr-4">
-          <Label htmlFor="perPage" className="mr-2">
+          <Label htmlFor="perPage" className="mr-2 hidden md:block">
             페이지당 항목:
           </Label>
           <select
@@ -44,7 +44,9 @@ export function PaginationControls({
             size="icon"
             onClick={() => onPageChange(1)}
             disabled={pagination.page === 1}
-            className={theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-700 hover:text-black"}
+            className={`${
+              theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-700 hover:text-black"
+            } hidden md:flex`}
           >
             <ChevronsLeft className="h-4 w-4" />
           </Button>
@@ -74,9 +76,14 @@ export function PaginationControls({
             size="icon"
             onClick={() => onPageChange(totalPages)}
             disabled={pagination.page >= totalPages}
+            className={`${
+              theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-700 hover:text-black"
+            } hidden md:flex`}
           >
             <ChevronsRight className="h-4 w-4" />
           </Button>
+          {/* 모바일 환경일 경우 우측 아래에 있는 메뉴에 가려지는 부분 없게끔 할 공백 */}
+          <div className="h-10 w-10 block md:hidden" />
         </div>
       </div>
     </div>

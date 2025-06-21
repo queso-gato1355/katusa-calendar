@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import { formatLocalDateOnly, formatLocalTimeOnly, toISOString } from "@/lib/date-utils"
 
 export default function EventForm({ event, isOpen, onClose, onSave, theme = "light" }) {
   const [formData, setFormData] = useState({
@@ -14,8 +15,10 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
     title: "",
     description: "",
     location: "",
-    start_at: "",
-    end_at: "",
+    start_date: "",
+    start_time: "",
+    end_date: "",
+    end_time: "",
     all_day: true,
     is_holiday: false,
     is_usfk: false,
@@ -26,19 +29,20 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
     if (isOpen) {
       if (event) {
         // 기존 이벤트 수정 모드
-        const startDate = new Date(event.start_at)
-        const endDate = new Date(event.end_at)
+        console.log("Loading event data:", event)
 
         setFormData({
           id: event.id || "",
           title: event.title || "",
           description: event.description || "",
           location: event.location || "",
-          start_at: formatDateForInput(startDate),
-          end_at: formatDateForInput(endDate),
-          all_day: event.all_day || false,
-          is_holiday: event.is_holiday || false,
-          is_usfk: event.is_usfk || false,
+          start_date: formatLocalDateOnly(event.start_at),
+          start_time: formatLocalTimeOnly(event.start_at),
+          end_date: formatLocalDateOnly(event.end_at),
+          end_time: formatLocalTimeOnly(event.end_at),
+          all_day: event.all_day !== undefined ? event.all_day : true,
+          is_holiday: event.is_holiday !== undefined ? event.is_holiday : false,
+          is_usfk: event.is_usfk !== undefined ? event.is_usfk : false,
         })
       } else {
         // 새 이벤트 생성 모드
@@ -51,8 +55,10 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
           title: "",
           description: "",
           location: "",
-          start_at: formatDateForInput(now),
-          end_at: formatDateForInput(tomorrow),
+          start_date: formatLocalDateOnly(now),
+          start_time: "09:00",
+          end_date: formatLocalDateOnly(tomorrow),
+          end_time: "18:00",
           all_day: true,
           is_holiday: false,
           is_usfk: false,
@@ -61,17 +67,20 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
     }
   }, [event, isOpen])
 
-  // 날짜를 input[type="datetime-local"]에 맞는 형식으로 변환
-  const formatDateForInput = (date) => {
-    return date.toISOString().slice(0, 16)
-  }
-
   // 폼 데이터 변경 핸들러
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
+    })
+  }
+
+  // 체크박스 변경 핸들러
+  const handleCheckboxChange = (name, checked) => {
+    setFormData({
+      ...formData,
+      [name]: checked,
     })
   }
 
@@ -83,25 +92,44 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
       return
     }
 
-    if (!formData.start_at || !formData.end_at) {
+    if (!formData.start_date || !formData.end_date) {
       alert("시작일과 종료일을 입력해주세요.")
       return
     }
 
+    // 날짜와 시간 결합 (데이터베이스에는 UTC+0으로 저장)
+    const startDateTime = formData.all_day
+      ? new Date(`${formData.start_date}T00:00:00`).toISOString()
+      : toISOString(formData.start_date, formData.start_time)
+
+    const endDateTime = formData.all_day
+      ? new Date(`${formData.end_date}T23:59:59`).toISOString()
+      : toISOString(formData.end_date, formData.end_time)
+
+
     // 종료일이 시작일보다 이전인 경우
-    if (new Date(formData.end_at) < new Date(formData.start_at)) {
-      alert("종료일은 시작일보다 이후여야 합니다.")
+    if (new Date(endDateTime) < new Date(startDateTime)) {
+      alert("종료일시는 시작일시보다 이후여야 합니다.")
       return
     }
 
     // 이벤트 데이터 저장
-    onSave(formData)
+    const eventData = {
+      ...formData,
+      start_at: startDateTime,
+      end_at: endDateTime,
+    }
+
+    console.log("Saving event data:", eventData)
+    onSave(eventData)
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={`sm:max-w-[500px] ${theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}`}
+        className={`sm:max-w-[500px] max-h-[90vh] overflow-y-auto ${
+          theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
+        }`}
       >
         <DialogHeader>
           <DialogTitle>{event ? "일정 수정" : "새 일정 추가"}</DialogTitle>
@@ -143,47 +171,66 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
             />
           </div>
 
+          <div className="flex items-center space-x-2 mb-2">
+            <Checkbox
+              id="all_day"
+              name="all_day"
+              checked={formData.all_day}
+              onCheckedChange={(checked) => handleCheckboxChange("all_day", checked)}
+            />
+            <Label htmlFor="all_day">종일 일정</Label>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="start_at">시작일 *</Label>
+              <Label htmlFor="start_date">시작일 *</Label>
               <Input
-                type={formData.all_day ? "date" : "datetime-local"}
-                id="start_at"
-                name="start_at"
-                value={formData.start_at}
+                type="date"
+                id="start_date"
+                name="start_date"
+                value={formData.start_date}
                 onChange={handleChange}
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="end_at">종료일 *</Label>
+              <Label htmlFor="end_date">종료일 *</Label>
               <Input
-                type={formData.all_day ? "date" : "datetime-local"}
-                id="end_at"
-                name="end_at"
-                value={formData.end_at}
+                type="date"
+                id="end_date"
+                name="end_date"
+                value={formData.end_date}
                 onChange={handleChange}
                 required
               />
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="all_day"
-              name="all_day"
-              checked={formData.all_day}
-              onCheckedChange={(checked) => setFormData({ ...formData, all_day: checked })}
-            />
-            <Label htmlFor="all_day">종일 일정</Label>
-          </div>
+          {!formData.all_day && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="start_time">시작 시간</Label>
+                <Input
+                  type="time"
+                  id="start_time"
+                  name="start_time"
+                  value={formData.start_time}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="end_time">종료 시간</Label>
+                <Input type="time" id="end_time" name="end_time" value={formData.end_time} onChange={handleChange} />
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center space-x-2">
             <Checkbox
               id="is_holiday"
               name="is_holiday"
               checked={formData.is_holiday}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_holiday: checked })}
+              onCheckedChange={(checked) => handleCheckboxChange("is_holiday", checked)}
             />
             <Label htmlFor="is_holiday">휴일로 표시</Label>
           </div>
@@ -193,7 +240,7 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
               id="is_usfk"
               name="is_usfk"
               checked={formData.is_usfk}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_usfk: checked })}
+              onCheckedChange={(checked) => handleCheckboxChange("is_usfk", checked)}
             />
             <Label htmlFor="is_usfk">USFK 전용 일정</Label>
           </div>

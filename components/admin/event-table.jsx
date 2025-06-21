@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Edit, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+import { Edit, Trash2 } from "lucide-react"
+import { PaginationControls } from "@/components/ui/pagination-controls"
 
 export default function EventTable({
   events,
@@ -32,8 +33,17 @@ export default function EventTable({
   }
 
   // 날짜 포맷 함수
-  const formatDate = (dateString) => {
+  const formatDate = (dateString, all_day) => {
     const date = new Date(dateString)
+    if (isNaN(date.getTime())) return "유효하지 않은 날짜"
+    if (all_day) {
+      // 종일 일정인 경우 시간은 표시하지 않음
+      return date.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+    }
     return date.toLocaleDateString("ko-KR", {
       year: "numeric",
       month: "2-digit",
@@ -43,31 +53,22 @@ export default function EventTable({
     })
   }
 
+  // 페이지네이션 헬퍼 함수들
+  const getTotalPages = () => Math.ceil(pagination.total / pagination.perPage) || 1
+
+  const getDisplayRange = () => {
+    if (pagination.total === 0) return "0 결과"
+    const start = (pagination.page - 1) * pagination.perPage + 1
+    const end = Math.min(pagination.page * pagination.perPage, pagination.total)
+    return `${start}-${end} / ${pagination.total}`
+  }
+
   return (
     <div className="space-y-4">
       {/* Table Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
         <div className="text-sm">
           총 <span className="font-medium">{pagination.total}</span>개의 일정
-        </div>
-        <div className="flex items-center gap-2">
-          <label htmlFor="perPage" className="text-sm">
-            페이지당 항목:
-          </label>
-          <select
-            id="perPage"
-            value={pagination.perPage}
-            onChange={(e) => onPerPageChange(Number(e.target.value))}
-            className={`rounded-md border px-2 py-1 text-sm ${
-              theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300 text-gray-900"
-            }`}
-          >
-            {[5, 10, 20, 50].map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
@@ -149,8 +150,8 @@ export default function EventTable({
                     </td>
                   )}
                   <td className="px-4 py-3 text-sm font-medium">{event.title}</td>
-                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(event.start_at)}</td>
-                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(event.end_at)}</td>
+                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(event.start_at, event.all_day)}</td>
+                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(event.end_at, event.all_day)}</td>
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{event.location || "-"}</td>
                   <td className="px-4 py-3 text-sm text-right">
                     <div className="flex justify-end gap-2">
@@ -177,59 +178,16 @@ export default function EventTable({
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-4">
-        <div className="text-sm">
-          {pagination.total > 0
-            ? `${(pagination.page - 1) * pagination.perPage + 1}-${Math.min(pagination.page * pagination.perPage, pagination.total)} / ${pagination.total}`
-            : "0 결과"}
-        </div>
-        <div className="flex gap-1">
-          <button
-            onClick={() => onPageChange(1)}
-            disabled={pagination.page === 1}
-            className={`p-1 rounded-md ${
-              theme === "dark" ? "hover:bg-gray-800 disabled:text-gray-700" : "hover:bg-gray-100 disabled:text-gray-300"
-            } disabled:cursor-not-allowed`}
-          >
-            <ChevronsLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => onPageChange(pagination.page - 1)}
-            disabled={pagination.page === 1}
-            className={`p-1 rounded-md ${
-              theme === "dark" ? "hover:bg-gray-800 disabled:text-gray-700" : "hover:bg-gray-100 disabled:text-gray-300"
-            } disabled:cursor-not-allowed`}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-
-          <div className="flex items-center px-2">
-            <span className="text-sm">
-              {pagination.page} / {Math.ceil(pagination.total / pagination.perPage) || 1}
-            </span>
-          </div>
-
-          <button
-            onClick={() => onPageChange(pagination.page + 1)}
-            disabled={pagination.page >= Math.ceil(pagination.total / pagination.perPage)}
-            className={`p-1 rounded-md ${
-              theme === "dark" ? "hover:bg-gray-800 disabled:text-gray-700" : "hover:bg-gray-100 disabled:text-gray-300"
-            } disabled:cursor-not-allowed`}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => onPageChange(Math.ceil(pagination.total / pagination.perPage))}
-            disabled={pagination.page >= Math.ceil(pagination.total / pagination.perPage)}
-            className={`p-1 rounded-md ${
-              theme === "dark" ? "hover:bg-gray-800 disabled:text-gray-700" : "hover:bg-gray-100 disabled:text-gray-300"
-            } disabled:cursor-not-allowed`}
-          >
-            <ChevronsRight className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
+      {/* Pagination using PaginationControls component */}
+      <PaginationControls
+        pagination={pagination}
+        onPageChange={onPageChange}
+        onPerPageChange={onPerPageChange}
+        theme={theme}
+        perPageOptions={[5, 10, 20, 50]}
+        getDisplayRange={getDisplayRange}
+        getTotalPages={getTotalPages}
+      />
     </div>
   )
 }

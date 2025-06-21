@@ -330,7 +330,7 @@ export default function CalendarView({ theme, language = "ko" }) {
                       top: `${topOffset}px`,
                       left: `${leftOffset}%`,
                       width: `${width}%`,
-                      height: "18px",
+                      height: "20px",
                       zIndex: 10,
                     }}
                     onClick={(e) => handleEventClick(event, e)}

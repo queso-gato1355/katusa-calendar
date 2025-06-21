@@ -79,7 +79,7 @@ export default function Sidebar({ activeCalendar, theme }) {
 
   return (
     <>
-      {/* Mobile Menu Button - 오른쪽 상단으로 위치 변경 */}
+      {/* Mobile Menu Button - 오른쪽 하단으로 위치 변경 */}
       <div className="md:hidden fixed bottom-4 right-4 z-50">
         <button
           onClick={() => setIsMobileMenuOpen(true)}

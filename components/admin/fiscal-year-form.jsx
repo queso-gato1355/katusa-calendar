@@ -227,20 +227,37 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
   return (
     <div className="w-full">
       <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">{text.title || "Fiscal Year 휴일 관리"}</h2>
+        <h2 className="text-xl font-semibold break-keep">{text.title_fiscal || "Fiscal Year 휴일 관리"}</h2>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => openModal()}>
+          <Button variant="outline" onClick={() => openModal()} className="hidden md:flex">
             <Plus className="h-4 w-4 mr-2" />
             {text.addHoliday || "새 휴일 추가"}
+          </Button>
+          <Button variant="outline" onClick={() => openModal()} className="flex md:hidden">
+            <Plus className="h-4 w-4 mr-2" />
+            {text.addHoliday_short || "추가"}
           </Button>
           <Button
             variant="default"
             onClick={regenerateICSFiles}
             disabled={loading || holidays.length === 0}
-            className={`${theme === "dark" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"}`}
+            className={`${
+              theme === "dark" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"
+            } hidden md:flex`}
           >
             <Check className="h-4 w-4 mr-2" />
             {text.regenerateICS || "ICS 파일 재생성"}
+          </Button>
+          <Button
+            variant="default"
+            onClick={regenerateICSFiles}
+            disabled={loading || holidays.length === 0}
+            className={`${
+              theme === "dark" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"
+            } flex md:hidden`}
+          >
+            <Check className="h-4 w-4 mr-2" />
+            {text.regenerateICS_short || "재생성"}
           </Button>
         </div>
       </div>
