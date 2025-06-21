@@ -140,7 +140,7 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 h-10">
                   <Globe className="h-5 w-5 mr-1" />
                   <span className="hidden sm:inline-flex items-center gap-1">
                     <span className="mr-1">{currentLanguage.flag}</span>
@@ -168,7 +168,7 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
-            <Button className="border rounded-full" onClick={() => document.getElementById("calendars").scrollIntoView({ behavior: "smooth" })}>
+            <Button variant="ghost" className="border rounded-full" onClick={() => document.getElementById("calendars").scrollIntoView({ behavior: "smooth" })}>
               <span className="hidden md:block">{headerText.subscribeButton}</span>
               <span className="md:hidden">
                 <CalendarPlus className="h-5 w-5" />

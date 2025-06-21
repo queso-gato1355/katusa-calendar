@@ -338,7 +338,7 @@ export const translations = {
   calendarPage: {
     ko: {
       title: "KATUSA 캘린더",
-      description: "모든 일정을 한눈에 확인하세요. 일정을 클릭하면 상세 정보를 볼 수 있습니다.",
+      subtitle: "모든 일정을 한눈에 확인하세요. 일정을 클릭하면 상세 정보를 볼 수 있습니다.",
       year: "년",
       previousMonth: "이전 달",
       nextMonth: "다음 달",
@@ -363,7 +363,7 @@ export const translations = {
     },
     en: {
       title: "KATUSA Calendar",
-      description: "View all schedules at a glance. Click on an event to see details.",
+      subtitle: "View all schedules at a glance. Click on an event to see details.",
       year: "",
       previousMonth: "Previous Month",
       nextMonth: "Next Month",
@@ -388,7 +388,7 @@ export const translations = {
     },
     es: {
       title: "Calendario KATUSA",
-      description: "Vea todos los horarios de un vistazo. Haga clic en un evento para ver los detalles.",
+      subtitle: "Vea todos los horarios de un vistazo. Haga clic en un evento para ver los detalles.",
       year: "",
       previousMonth: "Mes Anterior",
       nextMonth: "Mes Siguiente",
