@@ -20,7 +20,6 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
     end_date: "",
     end_time: "",
     all_day: true,
-    is_holiday: false,
     is_usfk: false,
   })
 
@@ -41,7 +40,6 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
           end_date: formatLocalDateOnly(event.end_at),
           end_time: formatLocalTimeOnly(event.end_at),
           all_day: event.all_day !== undefined ? event.all_day : true,
-          is_holiday: event.is_holiday !== undefined ? event.is_holiday : false,
           is_usfk: event.is_usfk !== undefined ? event.is_usfk : false,
         })
       } else {
@@ -60,7 +58,6 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
           end_date: formatLocalDateOnly(tomorrow),
           end_time: "18:00",
           all_day: true,
-          is_holiday: false,
           is_usfk: false,
         })
       }
@@ -113,11 +110,16 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
       return
     }
 
-    // 이벤트 데이터 저장
+    // 이벤트 데이터 저장 (date, time은 제외한 새로운 폼)
     const eventData = {
-      ...formData,
+      id: formData.id || "",
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      location: formData.location.trim(),
       start_at: startDateTime,
       end_at: endDateTime,
+      all_day: formData.all_day,
+      is_usfk: formData.is_usfk,
     }
 
     console.log("Saving event data:", eventData)
@@ -225,7 +227,7 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
             </div>
           )}
 
-          <div className="flex items-center space-x-2">
+          {/* <div className="flex items-center space-x-2">
             <Checkbox
               id="is_holiday"
               name="is_holiday"
@@ -233,7 +235,7 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
               onCheckedChange={(checked) => handleCheckboxChange("is_holiday", checked)}
             />
             <Label htmlFor="is_holiday">휴일로 표시</Label>
-          </div>
+          </div> */}
 
           <div className="flex items-center space-x-2">
             <Checkbox
