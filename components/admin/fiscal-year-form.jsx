@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Plus, Check } from "lucide-react"
 import toast from "react-hot-toast"
 import { supabaseClient } from "@/lib/supabaseClient"
-import { getTranslation } from "@/data/translations"
 import { getDayOfWeek, generateYearOptions } from "@/lib/date-utils"
 import { usePagination } from "@/hooks/use-pagination"
 import { useFilter } from "@/hooks/use-filter"
@@ -13,16 +12,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PaginationControls } from "@/components/ui/pagination-controls"
-import { HolidayModal } from "./holiday-modal"
-import { HolidayTable } from "./holiday-table"
+import { PassModal } from "./pass-modal"
+import { PassTable } from "./pass-table"
 
 export default function FiscalYearForm({ theme, language = "ko" }) {
-  const [holidays, setHolidays] = useState([])
+  const [passes, setPasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [currentHoliday, setCurrentHoliday] = useState(null)
+  const [currentPass, setCurrentPass] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [selectedHolidays, setSelectedHolidays] = useState([])
+  const [selectedPasses, setSelectedPasses] = useState([])
 
   const supabase = supabaseClient
 
@@ -46,15 +45,12 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
     year: "",
   })
 
-  // 번역 텍스트 가져오기
-  const text = getTranslation("admin", language)?.fiscalYear || {}
-
   // 휴일 데이터 가져오기
   useEffect(() => {
-    fetchHolidays()
+    fetchPasses()
   }, [pagination.page, pagination.perPage, filter])
 
-  const fetchHolidays = async () => {
+  const fetchPasses = async () => {
     setLoading(true)
     try {
       const categories = ["us-holiday", "korean-army", "basic"]
@@ -118,19 +114,19 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
         holidaysByDate[dateKey].events.push(event)
       })
 
-      const formattedHolidays = Object.values(holidaysByDate).map((holiday) => {
-        const date = new Date(holiday.date)
+      const formattedPasses = Object.values(holidaysByDate).map((pass) => {
+        const date = new Date(pass.date)
         return {
-          ...holiday,
+          ...pass,
           day_of_week: getDayOfWeek(date.getFullYear(), date.getMonth() + 1, date.getDate()),
-          id: holiday.events[0].id,
+          id: pass.events[0].id,
         }
       })
 
-      setHolidays(formattedHolidays || [])
+      setPasses(formattedPasses || [])
     } catch (error) {
-      console.error("Error fetching holidays:", error)
-      toast.error(text.fetchError || "휴일 정보를 불러오는 중 오류가 발생했습니다.")
+      console.error("Error fetching passes:", error)
+      toast.error("휴일 정보를 불러오는 중 오류가 발생했습니다.")
     } finally {
       setLoading(false)
     }
@@ -141,38 +137,38 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
     resetToFirstPage()
   }
 
-  const openModal = (holiday = null) => {
-    setCurrentHoliday(holiday)
-    setIsEditing(!!holiday)
+  const openModal = (pass = null) => {
+    setCurrentPass(pass)
+    setIsEditing(!!pass)
     setIsModalOpen(true)
   }
 
   const closeModal = () => {
     setIsModalOpen(false)
-    setCurrentHoliday(null)
+    setCurrentPass(null)
   }
 
   const handleSaveSuccess = () => {
-    fetchHolidays()
+    fetchPasses()
     closeModal()
   }
 
   const handleDeleteSuccess = () => {
-    fetchHolidays()
+    fetchPasses()
     closeModal()
   }
 
   const handleDeleteSelected = async () => {
-    if (selectedHolidays.length === 0) return
-    if (!window.confirm(`선택한 ${selectedHolidays.length}개의 휴일을 삭제하시겠습니까?`)) return
+    if (selectedPasses.length === 0) return
+    if (!window.confirm(`선택한 ${selectedPasses.length}개의 휴일을 삭제하시겠습니까?`)) return
 
     try {
       setLoading(true)
       const eventIds = []
-      selectedHolidays.forEach((holidayId) => {
-        const holiday = holidays.find((h) => h.id === holidayId)
-        if (holiday && holiday.events) {
-          holiday.events.forEach((event) => {
+      selectedPasses.forEach((holidayId) => {
+        const pass = passes.find((h) => h.id === holidayId)
+        if (pass && pass.events) {
+          pass.events.forEach((event) => {
             eventIds.push(event.id)
           })
         }
@@ -183,11 +179,11 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
         if (error) throw error
       }
 
-      toast.success(`${selectedHolidays.length}개의 휴일이 삭제되었습니다.`)
-      setSelectedHolidays([])
-      fetchHolidays()
+      toast.success(`${selectedPasses.length}개의 휴일이 삭제되었습니다.`)
+      setSelectedPasses([])
+      fetchPasses()
     } catch (error) {
-      console.error("Error deleting selected holidays:", error)
+      console.error("Error deleting selected passes:", error)
       toast.error("휴일 삭제 중 오류가 발생했습니다.")
     } finally {
       setLoading(false)
@@ -212,10 +208,10 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       if (error) throw error
 
       toast.success("모든 휴일이 삭제되었습니다.")
-      setSelectedHolidays([])
-      fetchHolidays()
+      setSelectedPasses([])
+      fetchPasses()
     } catch (error) {
-      console.error("Error deleting all holidays:", error)
+      console.error("Error deleting all passes:", error)
       toast.error("휴일 삭제 중 오류가 발생했습니다.")
     } finally {
       setLoading(false)
@@ -227,37 +223,37 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
   return (
     <div className="w-full">
       <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold break-keep">{text.title_fiscal || "Fiscal Year 휴일 관리"}</h2>
+        <h2 className="text-xl font-semibold break-keep">Fiscal Year 패스 관리</h2>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => openModal()} className="hidden md:flex">
             <Plus className="h-4 w-4 mr-2" />
-            {text.addHoliday || "새 휴일 추가"}
+            새 휴일 추가
           </Button>
           <Button variant="outline" onClick={() => openModal()} className="flex md:hidden">
             <Plus className="h-4 w-4 mr-2" />
-            {text.addHoliday_short || "추가"}
+            추가
           </Button>
           <Button
             variant="default"
             onClick={regenerateICSFiles}
-            disabled={loading || holidays.length === 0}
+            disabled={loading || passes.length === 0}
             className={`${
               theme === "dark" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"
             } hidden md:flex`}
           >
             <Check className="h-4 w-4 mr-2" />
-            {text.regenerateICS || "ICS 파일 재생성"}
+            ICS 파일 재생성
           </Button>
           <Button
             variant="default"
             onClick={regenerateICSFiles}
-            disabled={loading || holidays.length === 0}
+            disabled={loading || passes.length === 0}
             className={`${
               theme === "dark" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"
             } flex md:hidden`}
           >
             <Check className="h-4 w-4 mr-2" />
-            {text.regenerateICS_short || "재생성"}
+            재생성
           </Button>
         </div>
       </div>
@@ -273,6 +269,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
               value={filter.search}
               onChange={handleFilterChange}
               placeholder="휴일 이름으로 검색"
+              className={`${theme === "dark" ? "bg-gray-900" : "bg-gray-200"}`}
             />
           </div>
           <div>
@@ -282,7 +279,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
               name="year"
               value={filter.year}
               onChange={handleFilterChange}
-              className="w-full h-10 px-3 py-2 bg-background border border-input rounded-md"
+              className={`w-full h-10 px-3 py-2 ${theme === "dark" ? "bg-gray-900" : "bg-gray-200"} border border-input rounded-md`}
             >
               <option value="">모든 연도</option>
               {yearOptions.map((year) => (
@@ -296,12 +293,12 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
             <Button variant="secondary" onClick={resetFilters}>
               필터 초기화
             </Button>
-            {selectedHolidays.length > 0 && (
+            {selectedPasses.length > 0 && (
               <Button variant="destructive" onClick={handleDeleteSelected}>
-                선택 삭제 ({selectedHolidays.length})
+                선택 삭제 ({selectedPasses.length})
               </Button>
             )}
-            {holidays.length > 0 && (
+            {passes.length > 0 && (
               <Button variant="destructive" onClick={handleDeleteAll}>
                 전체 삭제
               </Button>
@@ -311,14 +308,13 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       </div>
 
       {/* 테이블 */}
-      <HolidayTable
-        holidays={holidays}
+      <PassTable
+        passes={passes}
         loading={loading}
-        selectedHolidays={selectedHolidays}
-        setSelectedHolidays={setSelectedHolidays}
+        selectedPasses={selectedPasses}
+        setSelectedPasses={setSelectedPasses}
         onEdit={openModal}
         theme={theme}
-        text={text}
       />
 
       {/* 페이지네이션 */}
@@ -332,16 +328,14 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       />
 
       {/* 모달 */}
-      <HolidayModal
+      <PassModal
         isOpen={isModalOpen}
         onClose={closeModal}
-        holiday={currentHoliday}
+        pass={currentPass}
         isEditing={isEditing}
         onSaveSuccess={handleSaveSuccess}
         onDeleteSuccess={handleDeleteSuccess}
         theme={theme}
-        language={language}
-        text={text}
       />
     </div>
   )
