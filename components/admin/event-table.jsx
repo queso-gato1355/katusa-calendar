@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Edit, Trash2 } from "lucide-react"
+import { Edit, Trash2, RotateCcw } from "lucide-react"
 import { PaginationControls } from "@/components/ui/pagination-controls"
 
 export default function EventTable({
@@ -9,6 +9,9 @@ export default function EventTable({
   loading,
   theme,
   onEdit,
+  ableToEdit = true,
+  onRestore,
+  ableToRestore = false,
   onDelete,
   pagination,
   onPageChange,
@@ -155,13 +158,24 @@ export default function EventTable({
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{event.location || "-"}</td>
                   <td className="px-4 py-3 text-sm text-right">
                     <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => onEdit(event)}
-                        className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
-                        title="수정"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
+                      { ableToEdit && 
+                        <button
+                          onClick={() => onEdit(event)}
+                          className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
+                          title="수정"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                      }
+                      { ableToRestore && 
+                        <button
+                          onClick={() => onRestore(event)}
+                          className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
+                          title="복원"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </button>
+                      }
                       <button
                         onClick={() => onDelete(event)}
                         className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}

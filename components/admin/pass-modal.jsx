@@ -5,22 +5,20 @@ import { Trash2, Check } from "lucide-react"
 import toast from "react-hot-toast"
 import { supabaseClient } from "@/lib/supabaseClient"
 import { getDayOfWeek } from "@/lib/date-utils"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Toggle } from "@/components/ui/toggle"
 
-export function HolidayModal({
+export function PassModal({
   isOpen,
   onClose,
-  holiday,
+  pass,
   isEditing,
   onSaveSuccess,
   onDeleteSuccess,
   theme,
-  language,
-  text,
 }) {
   const [formData, setFormData] = useState({
     year: new Date().getFullYear(),
@@ -39,9 +37,9 @@ export function HolidayModal({
   const supabase = supabaseClient
 
   useEffect(() => {
-    if (holiday && isEditing) {
-      const startDate = new Date(holiday.date)
-      const endDate = new Date(holiday.end_date)
+    if (pass && isEditing) {
+      const startDate = new Date(pass.date)
+      const endDate = new Date(pass.end_date)
 
       setFormData({
         year: startDate.getFullYear(),
@@ -50,11 +48,11 @@ export function HolidayModal({
         endYear: endDate.getFullYear(),
         endMonth: endDate.getMonth() + 1,
         endDay: endDate.getDate(),
-        title: holiday.title,
-        us_observed: holiday.us_observed,
-        rok_observed: holiday.rok_observed,
-        katusa_observed: holiday.katusa_observed,
-        usfk_only: holiday.usfk_only,
+        title: pass.title,
+        us_observed: pass.us_observed,
+        rok_observed: pass.rok_observed,
+        katusa_observed: pass.katusa_observed,
+        usfk_only: pass.usfk_only,
       })
     } else {
       const now = new Date()
@@ -72,7 +70,7 @@ export function HolidayModal({
         usfk_only: false,
       })
     }
-  }, [holiday, isEditing, isOpen])
+  }, [pass, isEditing, isOpen])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -89,9 +87,9 @@ export function HolidayModal({
     })
   }
 
-  const saveHoliday = async () => {
+  const savePass = async () => {
     if (!formData.title.trim()) {
-      toast.error(text.titleRequired || "제목을 입력해주세요.")
+      toast.error("제목을 입력해주세요.")
       return
     }
 
@@ -105,16 +103,16 @@ export function HolidayModal({
       }
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        toast.error(text.invalidDate || "유효하지 않은 날짜입니다.")
+        toast.error("유효하지 않은 날짜입니다.")
         return
       }
 
       const events = []
 
       // 기존 이벤트 삭제 (수정 모드인 경우)
-      if (isEditing && holiday) {
-        if (holiday.events && holiday.events.length > 0) {
-          const eventIds = holiday.events.map((event) => event.id)
+      if (isEditing && pass) {
+        if (pass.events && pass.events.length > 0) {
+          const eventIds = pass.events.map((event) => event.id)
           const { error: deleteError } = await supabase.from("events").delete().in("id", eventIds)
           if (deleteError) throw deleteError
         }
@@ -128,7 +126,6 @@ export function HolidayModal({
           end_at: endDate.toISOString(),
           category: "us-holiday",
           all_day: true,
-          is_holiday: true,
           is_usfk: false,
           created_at: new Date().toISOString(),
         })
@@ -141,7 +138,6 @@ export function HolidayModal({
           end_at: endDate.toISOString(),
           category: "korean-army",
           all_day: true,
-          is_holiday: true,
           is_usfk: false,
           created_at: new Date().toISOString(),
         })
@@ -154,7 +150,6 @@ export function HolidayModal({
           end_at: endDate.toISOString(),
           category: "basic",
           all_day: true,
-          is_holiday: true,
           is_usfk: false,
           created_at: new Date().toISOString(),
         })
@@ -167,7 +162,6 @@ export function HolidayModal({
           end_at: endDate.toISOString(),
           category: "basic",
           all_day: true,
-          is_holiday: true,
           is_usfk: true,
           created_at: new Date().toISOString(),
         })
@@ -179,31 +173,31 @@ export function HolidayModal({
       }
 
       toast.success(
-        isEditing ? text.saveSuccess || "휴일이 수정되었습니다." : text.addSuccess || "새 휴일이 추가되었습니다.",
+        isEditing ? "휴일이 수정되었습니다." : "새 휴일이 추가되었습니다."
       )
       onSaveSuccess()
     } catch (error) {
-      console.error("Error saving holiday:", error)
-      toast.error(text.saveError || "휴일 저장 중 오류가 발생했습니다.")
+      console.error("Error saving pass:", error)
+      toast.error("휴일 저장 중 오류가 발생했습니다.")
     }
   }
 
   const deleteHoliday = async () => {
-    if (!holiday) return
-    if (!window.confirm(text.deleteConfirm || "정말로 이 휴일을 삭제하시겠습니까?")) return
+    if (!pass) return
+    if (!window.confirm("정말로 이 휴일을 삭제하시겠습니까?")) return
 
     try {
-      if (holiday.events && holiday.events.length > 0) {
-        const eventIds = holiday.events.map((event) => event.id)
+      if (pass.events && pass.events.length > 0) {
+        const eventIds = pass.events.map((event) => event.id)
         const { error: deleteError } = await supabase.from("events").delete().in("id", eventIds)
         if (deleteError) throw deleteError
       }
 
-      toast.success(text.deleteSuccess || "휴일이 삭제되었습니다.")
+      toast.success("휴일이 삭제되었습니다.")
       onDeleteSuccess()
     } catch (error) {
-      console.error("Error deleting holiday:", error)
-      toast.error(text.deleteError || "휴일 삭제 중 오류가 발생했습니다.")
+      console.error("Error deleting pass:", error)
+      toast.error("휴일 삭제 중 오류가 발생했습니다.")
     }
   }
 
@@ -212,9 +206,13 @@ export function HolidayModal({
       <DialogContent className={theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}>
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? text.editHoliday || "휴일 수정" : text.addNewHoliday || "새 휴일 추가"}
+            {isEditing ? "패스 수정" : "새 패스 추가"}
           </DialogTitle>
         </DialogHeader>
+
+        <DialogDescription>
+          {isEditing ? "패스 정보를 수정하세요." : "새 패스 정보를 입력하세요."}
+        </DialogDescription>
 
         <div className="space-y-4 py-4">
           {/* 시작 날짜 입력 */}
@@ -223,7 +221,7 @@ export function HolidayModal({
             <div className="grid grid-cols-3 gap-2 mt-1">
               <div>
                 <Label htmlFor="year" className="sr-only">
-                  {text.year || "연도"} *
+                  연도 *
                 </Label>
                 <Input
                   type="number"
@@ -239,7 +237,7 @@ export function HolidayModal({
               </div>
               <div>
                 <Label htmlFor="month" className="sr-only">
-                  {text.month || "월"} *
+                  월 *
                 </Label>
                 <Input
                   type="number"
@@ -255,7 +253,7 @@ export function HolidayModal({
               </div>
               <div>
                 <Label htmlFor="day" className="sr-only">
-                  {text.day || "일"} *
+                  일 *
                 </Label>
                 <Input
                   type="number"
@@ -278,7 +276,7 @@ export function HolidayModal({
             <div className="grid grid-cols-3 gap-2 mt-1">
               <div>
                 <Label htmlFor="endYear" className="sr-only">
-                  {text.year || "연도"} *
+                  연도 *
                 </Label>
                 <Input
                   type="number"
@@ -294,7 +292,7 @@ export function HolidayModal({
               </div>
               <div>
                 <Label htmlFor="endMonth" className="sr-only">
-                  {text.month || "월"} *
+                  월 *
                 </Label>
                 <Input
                   type="number"
@@ -310,7 +308,7 @@ export function HolidayModal({
               </div>
               <div>
                 <Label htmlFor="endDay" className="sr-only">
-                  {text.day || "일"} *
+                  일 *
                 </Label>
                 <Input
                   type="number"
@@ -329,7 +327,7 @@ export function HolidayModal({
 
           {/* 요일 표시 */}
           <div>
-            <Label>{text.dayOfWeek || "요일"}</Label>
+            <Label>요일</Label>
             <div className="h-10 px-3 py-2 rounded-md border bg-muted">
               {getDayOfWeek(formData.year, formData.month, formData.day)}
             </div>
@@ -337,7 +335,7 @@ export function HolidayModal({
 
           {/* 제목 입력 */}
           <div>
-            <Label htmlFor="title">{text.holidayTitle || "제목"} *</Label>
+            <Label htmlFor="title">제목 *</Label>
             <Input
               type="text"
               id="title"
@@ -345,16 +343,16 @@ export function HolidayModal({
               value={formData.title}
               onChange={handleChange}
               required
-              placeholder={text.holidayTitlePlaceholder || "휴일 이름을 입력하세요"}
+              placeholder="휴일 이름을 입력하세요"
             />
           </div>
 
           {/* Observed by 토글 버튼 */}
           <div className="space-y-3">
-            <Label>{text.observedBy || "Observed by"}</Label>
+            <Label>Observed by</Label>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm">{text.us || "US"}</span>
+              <span className="text-sm">US</span>
               <Toggle
                 pressed={formData.us_observed}
                 onPressedChange={() => handleToggle("us_observed")}
@@ -363,12 +361,12 @@ export function HolidayModal({
                   formData.us_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
                 }
               >
-                {formData.us_observed ? text.yes || "Yes" : text.no || "No"}
+                {formData.us_observed ? "Yes" : "No"}
               </Toggle>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm">{text.rok || "ROK"}</span>
+              <span className="text-sm">ROK</span>
               <Toggle
                 pressed={formData.rok_observed}
                 onPressedChange={() => handleToggle("rok_observed")}
@@ -377,12 +375,12 @@ export function HolidayModal({
                   formData.rok_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
                 }
               >
-                {formData.rok_observed ? text.yes || "Yes" : text.no || "No"}
+                {formData.rok_observed ? "Yes" : "No"}
               </Toggle>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm">{text.katusa || "KATUSA"}</span>
+              <span className="text-sm">KATUSA</span>
               <Toggle
                 pressed={formData.katusa_observed}
                 onPressedChange={() => handleToggle("katusa_observed")}
@@ -391,12 +389,12 @@ export function HolidayModal({
                   formData.katusa_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
                 }
               >
-                {formData.katusa_observed ? text.yes || "Yes" : text.no || "No"}
+                {formData.katusa_observed ? "Yes" : "No"}
               </Toggle>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm">{text.usfkOnly || "USFK Only"}</span>
+              <span className="text-sm">USFK Only</span>
               <Toggle
                 pressed={formData.usfk_only}
                 onPressedChange={() => handleToggle("usfk_only")}
@@ -405,29 +403,26 @@ export function HolidayModal({
                   formData.usfk_only ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
                 }
               >
-                {formData.usfk_only ? text.yes || "Yes" : text.no || "No"}
+                {formData.usfk_only ? "Yes" : "No"}
               </Toggle>
             </div>
           </div>
         </div>
 
         <DialogFooter className="flex justify-between">
-          {isEditing ? (
-            <Button variant="destructive" onClick={deleteHoliday}>
-              <Trash2 className="h-4 w-4 mr-2" />
-              {text.delete || "삭제"}
-            </Button>
-          ) : (
-            <div></div>
-          )}
-
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose}>
-              {text.cancel || "취소"}
+              취소
             </Button>
-            <Button onClick={saveHoliday}>
+            {isEditing && (
+              <Button variant="destructive" onClick={deleteHoliday}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                삭제
+              </Button>
+            )}
+            <Button onClick={savePass}>
               <Check className="h-4 w-4 mr-2" />
-              {isEditing ? text.edit || "수정" : text.add || "추가"}
+              {isEditing ? "수정" : "추가"}
             </Button>
           </div>
         </DialogFooter>

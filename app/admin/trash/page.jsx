@@ -6,6 +6,11 @@ import Sidebar from "@/components/admin/sidebar"
 import EventTable from "@/components/admin/event-table"
 import toast from "react-hot-toast"
 import { Undo, Trash2 } from "lucide-react"
+import { 
+  fetchDeletedEvents,
+  restoreEvent,
+  permanentDeleteEvent
+ } from "@/lib/supabase-helpers"
 
 export default function TrashPage() {
   const [theme, setTheme] = useState("light")
@@ -29,10 +34,10 @@ export default function TrashPage() {
 
   // 삭제된 일정 데이터 가져오기
   useEffect(() => {
-    fetchDeletedEvents()
+    getDeletedEvents()
   }, [pagination.page, pagination.perPage])
 
-  const fetchDeletedEvents = async () => {
+  const getDeletedEvents = async () => {
     setLoading(true)
     try {
       const { from, to } = getPaginationRange()
@@ -41,13 +46,8 @@ export default function TrashPage() {
       const {
         data: events,
         error,
-        count,
-      } = await supabase
-        .from("events")
-        .select("*", { count: "exact" })
-        .eq("is_disabled", true)
-        .order("updated_at", { ascending: false })
-        .range(from, to)
+        count, // 전체 삭제된 이벤트 수
+      } = await fetchDeletedEvents({ from, to })
 
       if (error) throw error
 
@@ -78,15 +78,11 @@ export default function TrashPage() {
   const handleRestore = async (event) => {
     try {
       // 일정 복원: is_disabled를 false로 설정
-      const { error } = await supabase
-        .from("events")
-        .update({ is_disabled: false, updated_at: new Date().toISOString() })
-        .eq("id", event.id)
-
+      const { error } = await restoreEvent(event.id)
       if (error) throw error
 
       toast.success("일정이 복원되었습니다.")
-      fetchDeletedEvents()
+      getDeletedEvents()
     } catch (error) {
       console.error("Error restoring event:", error)
       toast.error("일정 복원 중 오류가 발생했습니다.")
@@ -94,16 +90,16 @@ export default function TrashPage() {
   }
 
   const handlePermanentDelete = async (event) => {
-    if (!window.confirm("정말로 이 일정을 영구적으로 삭제하시겠습니까? 이 ���업은 되돌릴 수 없습니다.")) return
+    if (!window.confirm("정말로 이 일정을 영구적으로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return
 
     try {
       // 일정 영구 삭제
-      const { error } = await supabase.from("events").delete().eq("id", event.id)
+      const { error } = await permanentDeleteEvent(event.id)
 
       if (error) throw error
 
       toast.success("일정이 영구적으로 삭제되었습니다.")
-      fetchDeletedEvents()
+      getDeletedEvents()
     } catch (error) {
       console.error("Error permanently deleting event:", error)
       toast.error("일정 영구 삭제 중 오류가 발생했습니다.")
@@ -153,7 +149,10 @@ export default function TrashPage() {
           loading={loading}
           theme={theme}
           onEdit={() => {}} // 휴지통에서는 편집 기능 비활성화
-          onDelete={() => {}} // 휴지통에서는 삭제 기능 비활성화
+          ableToEdit={false} // 편집 기능 비활성화
+          ableToRestore={true} // 복원 기능 활성화
+          onRestore={handleRestore}
+          onDelete={handlePermanentDelete} // 휴지통에서는 삭제 기능이 영구 삭제로 대체됨
           pagination={pagination}
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}

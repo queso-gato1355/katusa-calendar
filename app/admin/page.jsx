@@ -1,8 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { fetchEvents, saveEvent, softDeleteEvent } from "@/lib/supabase-helpers"
+import { useSearchParams, useRouter } from "next/navigation"
+import { 
+  fetchEvents, 
+  saveEvent, 
+  softDeleteEvent,
+  softDeleteEvents
+} from "@/lib/supabase-helpers"
 import { calendarsData } from "@/data/calendars"
 import { getThemeStyles } from "@/data/admin-ui"
 import Sidebar from "@/components/admin/sidebar"
@@ -10,10 +15,10 @@ import EventTable from "@/components/admin/event-table"
 import EventForm from "@/components/admin/event-form"
 import AddButton from "@/components/admin/add-button"
 import toast from "react-hot-toast"
-import { supabaseClient } from "@/lib/supabaseClient"
 
 export default function AdminPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [theme, setTheme] = useState("light")
   const [activeCalendar, setActiveCalendar] = useState("basic")
   const [events, setEvents] = useState([])
@@ -26,6 +31,14 @@ export default function AdminPage() {
     perPage: 10,
     total: 0,
   })
+
+  // URL 파라미터 없이 링크로 접속했다면 기본 basic이 파라미터 값인 링크로 푸시하기
+  useEffect(() => {
+    const calendarParam = searchParams.get("calendar")
+    if (!calendarParam) {
+      router.replace(`/admin?calendar=basic`)
+    }
+  }, [searchParams, router])
 
   // 현재 선택된 캘린더 정보
   const currentCalendarInfo = calendarsData.find((cal) => cal.id === activeCalendar) || calendarsData[0]
@@ -164,13 +177,7 @@ export default function AdminPage() {
     try {
       setLoading(true)
       // 선택된 모든 이벤트를 소프트 딜리트
-      const { error } = await supabaseClient
-        .from("events")
-        .update({
-          is_disabled: true,
-          updated_at: new Date().toISOString(),
-        })
-        .in("id", selectedEvents)
+      const { error } = await softDeleteEvents(selectedEvents)
 
       if (error) throw error
 
