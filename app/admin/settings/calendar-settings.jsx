@@ -1,9 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabaseClient } from "@/lib/supabaseClient"
-import { updateCalendarActiveStatus } from "@/lib/supabase-helpers"
+import { 
+  updateCalendarActiveStatus, 
+  fetchCalendarSettings, 
+  getCalendarStatus
+} from "@/lib/supabase-helpers"
 import toast from "react-hot-toast"
+import { regenerateICSFiles } from "@/services/ics-service"
 import { Save, RefreshCw } from "lucide-react"
 
 export default function CalendarSettings({ theme }) {
@@ -11,28 +15,36 @@ export default function CalendarSettings({ theme }) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
-
-  const supabase = supabaseClient
+  const [calendarStatus, setCalendarStatus] = useState({})
 
   // 캘린더 데이터 가져오기
   useEffect(() => {
     fetchCalendars()
+    fetchCalendarStatus()
   }, [])
 
   const fetchCalendars = async () => {
     setLoading(true)
-    try {
-      const { data, error } = await supabase.from("calendars").select("*").order("id")
+    fetchCalendarSettings()
+      .then((data) => {
+        setCalendars(data)
+      })
+      .catch((error) => {
+        console.error("Error fetching calendar settings:", error)
+        toast.error("캘린더 정보를 불러오는 중 오류가 발생했습니다.")
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
 
-      if (error) throw error
+  const fetchCalendarStatus = async () => {
+    const status = await getCalendarStatus()
+    setCalendarStatus(status)
+  }
 
-      setCalendars(data || [])
-    } catch (error) {
-      console.error("Error fetching calendars:", error)
-      toast.error("캘린더 정보를 불러오는 중 오류가 발생했습니다.")
-    } finally {
-      setLoading(false)
-    }
+  const getCopyCount = (calendarId) => {
+    return calendarStatus[calendarId]?.copy_count || 0
   }
 
   const handleToggleActive = (id) => {
@@ -67,35 +79,8 @@ export default function CalendarSettings({ theme }) {
   const handleRegenerateICS = async () => {
     setRegenerating(true)
     try {
-      // CRON_SECRET 환경 변수 가져오기
-      const { data: settingsData, error: settingsError } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "cron_secret")
-        .single()
-
-      if (settingsError && settingsError.code !== "PGRST116") throw settingsError
-
-      const cronSecret = settingsData?.value || process.env.NEXT_PUBLIC_CRON_SECRET || "default-secret"
-
-      // ICS 파일 재생성 API 호출
-      const response = await fetch("/api/generate-ics", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${cronSecret}`,
-        },
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || "ICS 파일 재생성 중 오류가 발생했습니다.")
-      }
-
+      await regenerateICSFiles()
       toast.success("ICS 파일이 재생성되었습니다.")
-
-      // 캘린더 정보 다시 가져오기
-      fetchCalendars()
     } catch (error) {
       console.error("Error regenerating ICS files:", error)
       toast.error("ICS 파일 재생성 중 오류가 발생했습니다.")
@@ -146,7 +131,12 @@ export default function CalendarSettings({ theme }) {
               className="flex flex-col md:flex-row md:items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700"
             >
               <div className="flex-1">
-                <h3 className="font-medium">{calendar.title || calendar.id}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium">{calendar.title || calendar.id}</h3>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    (복사 횟수: {getCopyCount(calendar.id)})
+                  </span>
+                </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{calendar.description}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   프록시 경로: {calendar.proxy_path || "-"}

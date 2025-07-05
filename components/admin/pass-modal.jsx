@@ -87,7 +87,7 @@ export function PassModal({
     })
   }
 
-  const saveHoliday = async () => {
+  const savePass = async () => {
     if (!formData.title.trim()) {
       toast.error("제목을 입력해주세요.")
       return
@@ -124,7 +124,7 @@ export function PassModal({
           title: formData.title,
           start_at: startDate.toISOString(),
           end_at: endDate.toISOString(),
-          category: "us-pass",
+          category: "us-holiday",
           all_day: true,
           is_usfk: false,
           created_at: new Date().toISOString(),
@@ -420,7 +420,7 @@ export function PassModal({
                 삭제
               </Button>
             )}
-            <Button onClick={saveHoliday}>
+            <Button onClick={savePass}>
               <Check className="h-4 w-4 mr-2" />
               {isEditing ? "수정" : "추가"}
             </Button>

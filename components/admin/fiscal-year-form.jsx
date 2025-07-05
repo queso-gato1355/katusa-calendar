@@ -1,16 +1,27 @@
 "use client"
 
+// 기본
 import { useState, useEffect } from "react"
-import { Plus, Check } from "lucide-react"
 import toast from "react-hot-toast"
-import { supabaseClient } from "@/lib/supabaseClient"
-import { getDayOfWeek, generateYearOptions } from "@/lib/date-utils"
-import { usePagination } from "@/hooks/use-pagination"
-import { useFilter } from "@/hooks/use-filter"
-import { regenerateICSFiles } from "@/services/ics-service"
+
+// 아이콘
+import { Plus, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+
+// 함수 & 훅
+import { getDayOfWeek, generateYearOptions } from "@/lib/date-utils"
+import { regenerateICSFiles } from "@/services/ics-service"
+import { usePagination } from "@/hooks/use-pagination"
+import { useFilter } from "@/hooks/use-filter"
+import { 
+  fetchEventsByCategoryWithFlexibleQuery, 
+  softDeleteEventsByCategory,
+  softDeleteEvents
+} from "@/lib/supabase-helpers"
+
+// 컴포넌트
 import { PaginationControls } from "@/components/ui/pagination-controls"
 import { PassModal } from "./pass-modal"
 import { PassTable } from "./pass-table"
@@ -22,8 +33,6 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
   const [currentPass, setCurrentPass] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [selectedPasses, setSelectedPasses] = useState([])
-
-  const supabase = supabaseClient
 
   // 커스텀 훅 사용
   const {
@@ -54,76 +63,79 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
     setLoading(true)
     try {
       const categories = ["us-holiday", "korean-army", "basic"]
-      let query = supabase.from("events").select("*", { count: "exact" }).in("category", categories)
 
       // 필터 적용
+      let queryList = []
       if (filter.search) {
-        query = query.ilike("title", `%${filter.search}%`)
+        queryList.push(q => q.ilike("title", `%${filter.search}%`))
       }
-
       if (filter.year) {
         const startDate = new Date(Number.parseInt(filter.year), 0, 1).toISOString()
         const endDate = new Date(Number.parseInt(filter.year), 11, 31).toISOString()
-        query = query.gte("start_at", startDate).lte("start_at", endDate)
+        queryList.push(q => q.gte("start_at", startDate).lte("start_at", endDate))
       }
+      queryList.push(q => q.order("start_at", { ascending: true }))
 
-      query = query.order("start_at", { ascending: true })
-
-      const from = (pagination.page - 1) * pagination.perPage
-      const to = from + pagination.perPage - 1
-
-      const { data: allEvents, error, count } = await query.range(from, to)
+      let query = await fetchEventsByCategoryWithFlexibleQuery(categories, queryList)
+      const { data: allEvents, error } = query
 
       if (error) throw error
 
-      setTotal(count || 0)
-
-      // 날짜별로 그룹화
-      const holidaysByDate = {}
+      // 날짜+제목별로 그룹화
+      const holidaysByKey = {}
 
       allEvents.forEach((event) => {
-        const dateKey = event.start_at.split("T")[0]
-        const title = event.title.replace(" (USFK Only)", "")
+      const dateKey = event.start_at.split("T")[0]
+      const title = event.title.replace(" (USFK Only)", "")
+      const groupKey = `${dateKey}|${title}`
 
-        if (!holidaysByDate[dateKey]) {
-          holidaysByDate[dateKey] = {
-            date: event.start_at,
-            end_date: event.end_at,
-            title: title,
-            us_observed: false,
-            rok_observed: false,
-            katusa_observed: false,
-            usfk_only: false,
-            events: [],
-          }
+      if (!holidaysByKey[groupKey]) {
+        holidaysByKey[groupKey] = {
+        date: event.start_at,
+        end_date: event.end_at,
+        title: title,
+        us_observed: false,
+        rok_observed: false,
+        katusa_observed: false,
+        usfk_only: false,
+        events: [],
         }
+      }
 
-        // 카테고리에 따라 관찰 여부 설정
-        if (event.category === "us-holiday") {
-          holidaysByDate[dateKey].us_observed = true
-        } else if (event.category === "korean-army") {
-          holidaysByDate[dateKey].rok_observed = true
-        } else if (event.category === "basic") {
-          if (event.is_usfk) {
-            holidaysByDate[dateKey].usfk_only = true
-          } else {
-            holidaysByDate[dateKey].katusa_observed = true
-          }
+      // 카테고리에 따라 관찰 여부 설정
+      if (event.category === "us-holiday") {
+        holidaysByKey[groupKey].us_observed = true
+      } else if (event.category === "korean-army") {
+        holidaysByKey[groupKey].rok_observed = true
+      } else if (event.category === "basic") {
+        if (event.is_usfk) {
+        holidaysByKey[groupKey].usfk_only = true
+        } else {
+        holidaysByKey[groupKey].katusa_observed = true
         }
+      }
 
-        holidaysByDate[dateKey].events.push(event)
+      holidaysByKey[groupKey].events.push(event)
       })
 
-      const formattedPasses = Object.values(holidaysByDate).map((pass) => {
-        const date = new Date(pass.date)
-        return {
-          ...pass,
-          day_of_week: getDayOfWeek(date.getFullYear(), date.getMonth() + 1, date.getDate()),
-          id: pass.events[0].id,
-        }
+      const formattedPasses = Object.values(holidaysByKey).map((pass) => {
+      const date = new Date(pass.date)
+      return {
+        ...pass,
+        day_of_week: getDayOfWeek(date.getFullYear(), date.getMonth() + 1, date.getDate()),
+        id: pass.events[0].id,
+      }
       })
 
-      setPasses(formattedPasses || [])
+      // 전체 그룹화된 패스에서 페이지네이션 적용
+      const total = formattedPasses.length
+      setTotal(total)
+
+      const from = (pagination.page - 1) * pagination.perPage
+      const to = from + pagination.perPage
+      const pagedPasses = formattedPasses.slice(from, to)
+
+      setPasses(pagedPasses || [])
     } catch (error) {
       console.error("Error fetching passes:", error)
       toast.error("휴일 정보를 불러오는 중 오류가 발생했습니다.")
@@ -175,7 +187,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
       })
 
       if (eventIds.length > 0) {
-        const { error } = await supabase.from("events").delete().in("id", eventIds)
+        const { error } = await softDeleteEvents(eventIds)
         if (error) throw error
       }
 
@@ -196,15 +208,7 @@ export default function FiscalYearForm({ theme, language = "ko" }) {
     try {
       setLoading(true)
       const categories = ["us-holiday", "korean-army", "basic"]
-      let query = supabase.from("events").delete().in("category", categories)
-
-      if (filter.year) {
-        const startDate = new Date(Number.parseInt(filter.year), 0, 1).toISOString()
-        const endDate = new Date(Number.parseInt(filter.year), 11, 31).toISOString()
-        query = query.gte("start_at", startDate).lte("start_at", endDate)
-      }
-
-      const { error } = await query
+      const { error } = await softDeleteEventsByCategory(categories)
       if (error) throw error
 
       toast.success("모든 휴일이 삭제되었습니다.")

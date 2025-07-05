@@ -3,7 +3,7 @@
 import { Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "react-hot-toast"
 import { supabaseClient } from "@/lib/supabaseClient"
 
 export function PassTable({ passes, loading, selectedPasses, setSelectedPasses, onEdit, theme}) {
