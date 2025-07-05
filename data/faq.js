@@ -29,13 +29,25 @@ export const faqData = {
       id: "request",
       question: "내 부대 캘린더가 없어요. 추가해줄 수 있나요?",
       answer:
-        "네, 지속적으로 새로운 부대 캘린더를 추가하고 있습니다. 필요한 부대 캘린더가 있으시면 GitHub 이슈를 통해 요청해주세요.",
+        "네, 지속적으로 새로운 부대 캘린더를 추가하고 있습니다. 필요한 부대 캘린더가 있으시면 이메일 문의를 통해 요청해주세요.",
     },
     {
       id: "error",
       question: "캘린더 정보가 잘못되었어요. 어떻게 해야 하나요?",
       answer:
-        "캘린더 정보에 오류가 있거나 업데이트가 필요한 경우, GitHub 저장소에 이슈를 등록해주시면 빠르게 수정하겠습니다.",
+        "캘린더 정보에 오류가 있거나 업데이트가 필요한 경우, 이메일 문의를 통해 문제점을 알려주세요.",
+    },
+    {
+      id: "how-to-update-apple",
+      question: "Apple 캘린더에서 ICS 링크를 수동으로 업데이트하려면 어떻게 해야 하나요?",
+      answer:
+        "Apple 캘린더에서 ICS 링크를 수동으로 업데이트하려면, 캘린더 앱을 열고 구독 중인 캘린더를 선택한 후, '캘린더 정보'에서 '새로 고침' 버튼을 클릭하면 됩니다. 이 방법으로 최신 일정이 자동으로 반영됩니다.",
+    },
+    {
+      id: "how-to-update-android",
+      question: "Android 캘린더에서 ICS 링크를 수동으로 업데이트하려면 어떻게 해야 하나요?",
+      answer:
+        "Android 캘린더에서 ICS 링크를 수동으로 업데이트하려면, 기존에 다운받은 캘린더를 삭제한 후, 새로운 파일을 다운받은 후 다시 파일에 추가하면 됩니다.",
     },
   ],
   en: [
@@ -67,13 +79,25 @@ export const faqData = {
       id: "request",
       question: "My unit's calendar is not available. Can you add it?",
       answer:
-        "Yes, we are continuously adding new unit calendars. If you need a specific unit calendar, please request it through a GitHub issue.",
+        "Yes, we are continuously adding new unit calendars. If you need a specific unit calendar, please request it through an email.",
     },
     {
       id: "error",
       question: "The calendar information is incorrect. What should I do?",
       answer:
-        "If there are errors in the calendar information or updates are needed, please register an issue in the GitHub repository and we will fix it quickly.",
+        "If there are errors in the calendar information or updates are needed, please email us to let us know.",
+    },
+    {
+      id: "how-to-update-apple",
+      question: "How to manually update the ICS link in Apple Calendar?",
+      answer:
+        "To manually update the ICS link in Apple Calendar, open the Calendar app, select the subscribed calendar, and click the 'Refresh' button in 'Calendar Info'. This will automatically reflect the latest schedule.",
+    },
+    {
+      id: "how-to-update-android",
+      question: "How to manually update the ICS link in Android Calendar?",
+      answer:
+        "To manually update the ICS link in Android Calendar, delete the existing calendar and then download and add the new file again.",
     },
   ],
   es: [
@@ -105,13 +129,25 @@ export const faqData = {
       id: "request",
       question: "El calendario de mi unidad no está disponible. ¿Puedes agregarlo?",
       answer:
-        "Sí, estamos agregando continuamente nuevos calendarios de unidades. Si necesitas un calendario de unidad específico, solicítalo a través de un problema en GitHub.",
+        "Sí, estamos agregando continuamente nuevos calendarios de unidades. Si necesitas un calendario de unidad específico, solicítalo a través de un correo electrónico.",
     },
     {
       id: "error",
       question: "La información del calendario es incorrecta. ¿Qué debo hacer?",
       answer:
-        "Si hay errores en la información del calendario o se necesitan actualizaciones, regístrate en el repositorio de GitHub y lo corregiremos rápidamente.",
+        "Si hay errores en la información del calendario o se necesitan actualizaciones, envíanos un correo electrónico para informarnos.",
+    },
+    {
+      id: "how-to-update-apple",
+      question: "¿Cómo actualizar manualmente el enlace ICS en Apple Calendar?",
+      answer:
+        "Para actualizar manualmente el enlace ICS en Apple Calendar, abre la aplicación de calendario, selecciona el calendario suscrito y haz clic en el botón 'Actualizar' en 'Información del Calendario'. Esto reflejará automáticamente el horario más reciente.",
+    },
+    {
+      id: "how-to-update-android",
+      question: "¿Cómo actualizar manualmente el enlace ICS en Android Calendar?",
+      answer:
+        "Para actualizar manualmente el enlace ICS en Android Calendar, elimina el calendario existente y luego descarga y agrega el nuevo archivo nuevamente.",
     },
   ],
 }

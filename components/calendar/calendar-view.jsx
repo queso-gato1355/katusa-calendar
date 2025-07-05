@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight, X } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { supabaseClient } from "@/lib/supabaseClient"
 import toast from "react-hot-toast"
 import { getTranslation } from "@/data/translations"
 import { formatDate, formatTime, getLocale, isToday, isSameDay } from "@/lib/date-utils"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 
 export default function CalendarView({ theme, language = "ko" }) {
@@ -119,9 +119,9 @@ export default function CalendarView({ theme, language = "ko" }) {
     const categories = text.categories || {
       basic: "카투사 기본",
       kta: "KTA 일정",
-      koreanHoliday: "한국 휴일",
-      koreanArmy: "한국군 휴일",
-      usHoliday: "미군 휴일",
+      "korean-holiday": "한국 휴일",
+      "korean-army": "한국군 휴일",
+      "us-holiday": "미군 휴일",
     }
     return categories[category] || category
   }
@@ -134,6 +134,24 @@ export default function CalendarView({ theme, language = "ko" }) {
     e.stopPropagation()
     setSelectedEvent(event)
     setShowEventDetails(true)
+  }
+
+  // 카테고리별 레이어 순서 정의
+  const getCategoryLayer = (category) => {
+    switch (category) {
+      case "korean-holiday":
+        return 4 // 가장 위
+      case "us-holiday":
+        return 2
+      case "korean-army":
+        return 3
+      case "kta":
+        return 0
+      case "basic":
+        return 1 // 가장 아래
+      default:
+        return 5
+    }
   }
 
   // 연속된 이벤트를 처리하기 위한 함수
@@ -158,6 +176,7 @@ export default function CalendarView({ theme, language = "ko" }) {
           startDate,
           endDate,
           spans: [],
+          layer: getCategoryLayer(event.category),
         })
       }
     })
@@ -200,6 +219,16 @@ export default function CalendarView({ theme, language = "ko" }) {
         }
       })
 
+      // 카테고리별로 정렬하여 같은 카테고리끼리 연속 배치
+      weekEvents.sort((a, b) => {
+        // 먼저 레이어(카테고리)로 정렬
+        if (a.layer !== b.layer) {
+          return a.layer - b.layer
+        }
+        // 같은 카테고리 내에서는 시작 날짜로 정렬
+        return new Date(a.start_at) - new Date(b.start_at)
+      })
+
       processedEvents.push(...weekEvents)
     })
 
@@ -210,13 +239,29 @@ export default function CalendarView({ theme, language = "ko" }) {
   const weekdayNames = text.weekdays || ["일", "월", "화", "수", "목", "금", "토"]
   const processedEvents = processEventsForCalendar(days)
 
-  // 주별로 이벤트 그룹화
+  // 주별로 이벤트 그룹화 및 카테고리별 위치 할당
   const eventsByWeek = {}
   processedEvents.forEach((event) => {
     if (!eventsByWeek[event.weekIndex]) {
       eventsByWeek[event.weekIndex] = []
     }
     eventsByWeek[event.weekIndex].push(event)
+  })
+
+  // 각 주별로 카테고리별 위치 재할당
+  Object.keys(eventsByWeek).forEach((weekIndex) => {
+    const weekEvents = eventsByWeek[weekIndex]
+    const categoryPositions = new Map()
+    let currentPosition = 0
+
+    // 카테고리별로 연속된 위치 할당
+    weekEvents.forEach((event, index) => {
+      if (!categoryPositions.has(event.category)) {
+        categoryPositions.set(event.category, currentPosition)
+        currentPosition++
+      }
+      event.displayIndex = categoryPositions.get(event.category)
+    })
   })
 
   return (
@@ -245,31 +290,33 @@ export default function CalendarView({ theme, language = "ko" }) {
       {/* 캘린더 범례 */}
       <div className="mb-4 flex flex-wrap gap-2">
         <div className="flex items-center">
-          <div className="w-3 h-3 rounded-full bg-blue-500 mr-1"></div>
-          <span className="text-xs">{text.categories?.basic || "카투사 기본"}</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 rounded-full bg-purple-500 mr-1"></div>
-          <span className="text-xs">{text.categories?.kta || "KTA 일정"}</span>
-        </div>
-        <div className="flex items-center">
           <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
           <span className="text-xs">{text.categories?.koreanHoliday || "한국 휴일"}</span>
+        </div>
+        <div className="flex items-center">
+          <div className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
+          <span className="text-xs">{text.categories?.usHoliday || "미군 휴일"}</span>
         </div>
         <div className="flex items-center">
           <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
           <span className="text-xs">{text.categories?.koreanArmy || "한국군 휴일"}</span>
         </div>
         <div className="flex items-center">
-          <div className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
-          <span className="text-xs">{text.categories?.usHoliday || "미군 휴일"}</span>
+          <div className="w-3 h-3 rounded-full bg-purple-500 mr-1"></div>
+          <span className="text-xs">{text.categories?.kta || "KTA 일정"}</span>
+        </div>
+        <div className="flex items-center">
+          <div className="w-3 h-3 rounded-full bg-blue-500 mr-1"></div>
+          <span className="text-xs">{text.categories?.basic || "카투사 기본"}</span>
         </div>
       </div>
 
       {/* 캘린더 그리드 */}
       <div className="rounded-lg">
         {/* 요일 헤더 */}
-        <div className={`grid grid-cols-7 border-b rounded-tl-2xl rounded-tr-2xl ${theme === "dark" ? "bg-gray-800 border-gray-800" : "bg-gray-50 border-gray-50"}`}>
+        <div
+          className={`grid grid-cols-7 border-b rounded-tl-2xl rounded-tr-2xl ${theme === "dark" ? "bg-gray-800 border-gray-800" : "bg-gray-50 border-gray-50"}`}
+        >
           {weekdayNames.map((day, index) => (
             <div
               key={day}
@@ -317,7 +364,8 @@ export default function CalendarView({ theme, language = "ko" }) {
           {Object.entries(eventsByWeek).map(([weekIndex, weekEvents]) => (
             <div key={weekIndex} className="absolute inset-0">
               {weekEvents.map((event, eventIndex) => {
-                const topOffset = Number.parseInt(weekIndex) * 120 + 30 + eventIndex * 20
+                // 카테고리별 고정 위치 사용
+                const topOffset = Number.parseInt(weekIndex) * 120 + 30 + event.displayIndex * 20
                 const leftOffset = (event.startCol / 7) * 100
                 const width = (event.span / 7) * 100
 
@@ -330,8 +378,8 @@ export default function CalendarView({ theme, language = "ko" }) {
                       top: `${topOffset}px`,
                       left: `${leftOffset}%`,
                       width: `${width}%`,
-                      height: "20px",
-                      zIndex: 10,
+                      height: "22px",
+                      zIndex: 10 + event.layer, // 카테고리별 z-index
                     }}
                     onClick={(e) => handleEventClick(event, e)}
                     title={`${event.title} (${getCategoryName(event.category)})`}
@@ -352,12 +400,6 @@ export default function CalendarView({ theme, language = "ko" }) {
             <DialogTitle>{selectedEvent?.title}</DialogTitle>
             <DialogDescription className="sr-only" />
           </DialogHeader>
-
-          {/* <DialogClose asChild>
-            <div className="absolute top-4 right-4 cursor-pointer"> 
-              <X className="h-5 w-5" />
-            </div>
-          </DialogClose> */}
 
           {selectedEvent && (
             <div className="space-y-3 py-4">
@@ -403,7 +445,7 @@ export default function CalendarView({ theme, language = "ko" }) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-      )}      
+      )}
     </div>
   )
 }

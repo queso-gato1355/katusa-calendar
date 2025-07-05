@@ -39,9 +39,9 @@ function FAQCard({ theme, question, answer }) {
       } shadow-sm`}
     >
       <div className="flex flex-col space-y-1.5 p-6">
-        <h3 className="text-2xl font-semibold leading-none tracking-tight">{question}</h3>
+        <h3 className="text-2xl font-semibold leading-none tracking-tight break-keep">{question}</h3>
       </div>
-      <div className="p-6 pt-0">
+      <div className="p-6 pt-0 break-keep">
         <p>{answer}</p>
       </div>
     </div>
