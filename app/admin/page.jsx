@@ -67,7 +67,6 @@ export default function AdminPage() {
   const fetchCalendarEvents = async () => {
     setLoading(true)
     try {
-      const { from, to } = getPaginationRange()
 
       // 선택된 캘린더 타입에 맞는 이벤트 가져오기
       const { data, count } = await fetchEvents({
@@ -79,6 +78,8 @@ export default function AdminPage() {
         ascending: false,
       })
 
+      console.log("Fetched events:", data, "Count:", count)
+
       setEvents(data || [])
       setPagination((prev) => ({ ...prev, total: count || 0 }))
     } catch (error) {
@@ -87,12 +88,6 @@ export default function AdminPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const getPaginationRange = () => {
-    const from = (pagination.page - 1) * pagination.perPage
-    const to = from + pagination.perPage - 1
-    return { from, to }
   }
 
   const handlePageChange = (newPage) => {
