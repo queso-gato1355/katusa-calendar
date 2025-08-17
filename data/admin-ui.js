@@ -1,5 +1,5 @@
 // 관리자 UI 관련 데이터를 모아둔 파일입니다.
-import { Calendar, Trash2, Settings, Users, FileText } from "lucide-react"
+import { Calendar, Trash2, Settings, Users, FileText, Layers } from "lucide-react"
 
 // 사이드바 메뉴 항목
 export const sidebarMenuItems = [
@@ -70,6 +70,12 @@ export const sidebarMenuItems = [
         icon: Users,
         href: "/admin/users",
         requireSuperAdmin: true,
+      },
+      {
+        id: "inquiries",
+        title: "문의 관리",
+        icon: Layers,
+        href: "/admin/inquiries",
       },
     ],
   },

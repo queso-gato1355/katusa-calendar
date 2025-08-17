@@ -60,7 +60,7 @@ export function PaginationControls({
           </Button>
 
           <span className="flex items-center px-2 text-sm">
-            {pagination.page} / {totalPages}
+            {pagination.page || 1} / {totalPages || 1}
           </span>
 
           <Button

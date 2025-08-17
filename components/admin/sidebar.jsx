@@ -141,7 +141,7 @@ export default function Sidebar({ activeCalendar, theme }) {
           ))}
 
           {/* 문의 안내 카드 */}
-          <div
+          {/* <div
             className={`mt-2 p-3 rounded-md text-sm ${
               theme === "dark" ? "bg-gray-800 border border-gray-700" : "bg-gray-50 border border-gray-200"
             }`}
@@ -156,7 +156,7 @@ export default function Sidebar({ activeCalendar, theme }) {
             >
               문의하기
             </Link>
-          </div>
+          </div> */}
         </nav>
 
         <div className="p-4 border-t border-inherit">

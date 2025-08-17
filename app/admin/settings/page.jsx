@@ -1,22 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { supabaseClient } from "@/lib/supabaseClient"
 import Sidebar from "@/components/admin/sidebar"
 import CalendarSettings from "./calendar-settings"
 import toast from "react-hot-toast"
 import { Save } from "lucide-react"
+import { getContactEmail, updateContactEmail } from "@/lib/supabase-helpers"
 
 export default function SettingsPage() {
-  const router = useRouter()
   const [theme, setTheme] = useState("light")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [contactEmail, setContactEmail] = useState("")
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  const supabase = supabaseClient
 
   // 테마 설정
   useEffect(() => {
@@ -26,59 +21,19 @@ export default function SettingsPage() {
     }
   }, [])
 
-  // 인증 상태 확인
   useEffect(() => {
-    checkAuthentication()
+    fetchSettings()
   }, [])
-
-  const checkAuthentication = async () => {
-    try {
-      // 세션 쿠키에서 토큰 가져오기
-      const cookies = document.cookie.split(";").reduce((acc, cookie) => {
-        const [key, value] = cookie.trim().split("=")
-        acc[key] = value
-        return acc
-      }, {})
-
-      const sessionToken = cookies["admin_session"]
-
-      if (!sessionToken) {
-        // 세션이 없으면 로그인 페이지로 리디렉션
-        router.push("/admin/login")
-        return
-      }
-
-      // 세션 검증
-      const { data, error } = await supabase.rpc("validate_admin_session", {
-        session_token: sessionToken,
-      })
-
-      if (error || !data || data.length === 0 || !data[0].is_valid) {
-        // 세션이 유효하지 않으면 로그인 페이지로 리디렉션
-        router.push("/admin/login")
-        return
-      }
-
-      // 인증 성공
-      setIsAuthenticated(true)
-      fetchSettings()
-    } catch (error) {
-      console.error("Authentication error:", error)
-      router.push("/admin/login")
-    }
-  }
 
   // 설정 데이터 가져오기
   const fetchSettings = async () => {
     setLoading(true)
     try {
       // 연락처 이메일 가져오기
-      const { data: emailData, error: emailError } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "contact_email")
-        .single()
-
+      const emailData = await getContactEmail()
+      if (emailData) {
+        setContactEmail(emailData.value)
+      }
       if (emailError && emailError.code !== "PGRST116") throw emailError
 
       if (emailData) {
@@ -96,9 +51,9 @@ export default function SettingsPage() {
     setSaving(true)
     try {
       // 연락처 이메일 저장
-      const { error: emailError } = await supabase
-        .from("site_settings")
-        .upsert({ key: "contact_email", value: contactEmail })
+      const { success, error } = await updateContactEmail(contactEmail)
+
+      if (error) throw error
 
       if (emailError) throw emailError
 
@@ -109,15 +64,6 @@ export default function SettingsPage() {
     } finally {
       setSaving(false)
     }
-  }
-
-  // 인증되지 않은 경우 로딩 표시
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    )
   }
 
   return (
