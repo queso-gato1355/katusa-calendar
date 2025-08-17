@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { supabaseClient } from "@/lib/supabaseClient"
 import Sidebar from "@/components/admin/sidebar"
 import AdminUserModal from "@/components/admin/admin-user-modal"
 import toast from "react-hot-toast"
 import { UserPlus, Edit, User, Shield, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+import { getCurrentUser, fetchAdminAccounts } from "@/lib/supabase-helpers"
 
 export default function AdminUsersPage() {
   const router = useRouter()
@@ -16,14 +16,11 @@ export default function AdminUsersPage() {
   const [currentUser, setCurrentUser] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [pagination, setPagination] = useState({
     page: 1,
     perPage: 10,
     total: 0,
   })
-
-  const supabase = supabaseClient
 
   // 테마 설정
   useEffect(() => {
@@ -35,96 +32,46 @@ export default function AdminUsersPage() {
 
   // 인증 상태 확인
   useEffect(() => {
-    checkAuthentication()
+    checkCurrentUser()
   }, [])
 
-  const checkAuthentication = async () => {
+  const checkCurrentUser = async () => {
     try {
-      // 세션 쿠키에서 토큰 가져오기
-      const cookies = document.cookie.split(";").reduce((acc, cookie) => {
-        const [key, value] = cookie.trim().split("=")
-        acc[key] = value
-        return acc
-      }, {})
-
-      const sessionToken = cookies["admin_session"]
-
-      if (!sessionToken) {
-        // 세션이 없으면 로그인 페이지로 리디렉션
-        router.push("/admin/login")
-        return
+      const user = await getCurrentUser()
+      if (user) {
+        setCurrentUser({
+          id: user.id,
+          username: user.username,
+          nickname: user.nickname,
+          role: user.role,
+        })
+      } else {
+        setCurrentUser({
+          id: 1, // 기본값 설정
+          username: "guest",
+          nickname: "게스트",
+          role: "guest",
+        })
       }
-
-      // 세션 검증
-      const { data, error } = await supabase.rpc("validate_admin_session", {
-        session_token: sessionToken,
-      })
-
-      if (error || !data || data.length === 0 || !data[0].is_valid) {
-        // 세션이 유효하지 않으면 로그인 페이지로 리디렉션
-        router.push("/admin/login")
-        return
-      }
-
-      // 슈퍼 관리자 권한 확인
-      if (data[0].role !== "super_admin") {
-        toast.error("슈퍼 관리자만 접근할 수 있습니다.")
-        router.push("/admin")
-        return
-      }
-
-      // 인증 성공
-      setCurrentUser({
-        id: data[0].admin_id,
-        username: data[0].username,
-        nickname: data[0].nickname,
-        role: data[0].role,
-      })
-      setIsAuthenticated(true)
     } catch (error) {
-      console.error("Authentication error:", error)
-      router.push("/admin/login")
+      console.error("Error fetching current user:", error)
+      router.push("/admin")
     }
   }
 
   // 관리자 목록 가져오기
   useEffect(() => {
-    if (isAuthenticated && currentUser) {
+    if (currentUser) {
       fetchAdminUsers()
     }
-  }, [isAuthenticated, currentUser, pagination.page, pagination.perPage])
+  }, [currentUser, pagination.page, pagination.perPage])
 
   const fetchAdminUsers = async () => {
     setLoading(true)
     try {
       const { from, to } = getPaginationRange()
 
-      // 관리자 목록 가져오기 (생성자 및 수정자 정보 포함)
-      const query = supabase
-        .from("admin_users")
-        .select(
-          `
-          id, 
-          username, 
-          nickname,
-          role, 
-          created_at, 
-          updated_at,
-          is_active,
-          created_by,
-          updated_by,
-          creator:created_by(username, nickname),
-          updater:updated_by(username, nickname)
-        `,
-          { count: "exact" },
-        )
-        .eq("is_active", true)
-        .order("created_at", { ascending: false })
-        .range(from, to)
-
-      const { data, error, count } = await query
-
-      if (error) throw error
+      const { data, count } = await fetchAdminAccounts(from, to)
 
       setAdminUsers(data || [])
       setPagination((prev) => ({ ...prev, total: count || 0 }))
@@ -208,15 +155,6 @@ export default function AdminUsersPage() {
   const getUpdaterDisplay = (user) => {
     if (!user.updater) return "-"
     return user.updater.nickname || user.updater.username
-  }
-
-  // 인증되지 않은 경우 로딩 표시
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    )
   }
 
   return (

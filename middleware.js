@@ -12,10 +12,40 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 })
 
 export async function middleware(request) {
+  const { pathname } = request.nextUrl
+  // /admin/users 경로는 super_admin만 접근 허용
+  if (pathname.startsWith("/admin/users")) {
+
+    const sessionToken = request.cookies.get("admin_session")?.value
+
+    if (!sessionToken) {
+      return NextResponse.redirect(new URL("/admin/login", request.url))
+    }
+
+    try {
+      const { data, error } = await supabase.rpc("validate_admin_session", {
+        session_token: sessionToken,
+      })
+
+      if (
+        error ||
+        !data ||
+        data.length === 0 ||
+        !data[0].is_valid ||
+        data[0].role !== "super_admin" // super_admin만 허용
+      ) {
+        return NextResponse.redirect(new URL("/admin/login", request.url))
+      }
+    } catch (error) {
+      console.error("Session validation error:", error)
+      return NextResponse.redirect(new URL("/admin/login", request.url))
+    }
+    return NextResponse.next()
+  }
   // 관리자 페이지 경로 확인
-  if (request.nextUrl.pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin")) {
     // 로그인 페이지는 제외
-    if (request.nextUrl.pathname === "/admin/login") {
+    if (pathname === "/admin/login") {
       return NextResponse.next()
     }
 

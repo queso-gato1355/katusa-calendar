@@ -37,8 +37,8 @@ export const usePagination = (initialPerPage = 10) => {
   const getDisplayRange = () => {
     if (pagination.total === 0) return "0 결과"
 
-    const start = (pagination.page - 1) * pagination.perPage + 1
-    const end = Math.min(pagination.page * pagination.perPage, pagination.total)
+    const start = (pagination.page - 1) * pagination.perPage + 1 || 1
+    const end = Math.min(pagination.page * pagination.perPage, pagination.total) || 1
     return `${start}-${end} / ${pagination.total}`
   }
 

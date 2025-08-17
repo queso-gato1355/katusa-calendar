@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { formatLocalDateOnly, formatLocalTimeOnly, toISOString } from "@/lib/date-utils"
+import { formatLocalDateOnly, formatLocalTimeOnly, toISOString, convertAllDayToUTC, convertAllDayEndToUTC } from "@/lib/date-utils"
 
 export default function EventForm({ event, isOpen, onClose, onSave, theme = "light" }) {
   const [formData, setFormData] = useState({
@@ -96,11 +96,11 @@ export default function EventForm({ event, isOpen, onClose, onSave, theme = "lig
 
     // 날짜와 시간 결합 (데이터베이스에는 UTC+0으로 저장)
     const startDateTime = formData.all_day
-      ? new Date(`${formData.start_date}T00:00:00`).toISOString()
+      ? convertAllDayToUTC(`${formData.start_date}T00:00:00`)
       : toISOString(formData.start_date, formData.start_time)
 
     const endDateTime = formData.all_day
-      ? new Date(`${formData.end_date}T23:59:59`).toISOString()
+      ? convertAllDayEndToUTC(`${formData.end_date}T00:00:00`)
       : toISOString(formData.end_date, formData.end_time)
 
 

@@ -1,15 +1,27 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Trash2, Check } from "lucide-react"
-import toast from "react-hot-toast"
-import { supabaseClient } from "@/lib/supabaseClient"
-import { getDayOfWeek } from "@/lib/date-utils"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Toggle } from "@/components/ui/toggle"
+import { useState, useEffect } from "react";
+import { Trash2, Check } from "lucide-react";
+import toast from "react-hot-toast";
+import { supabaseClient } from "@/lib/supabaseClient";
+import { getDayOfWeek, convertAllDayToUTC, convertAllDayEndToUTC } from "@/lib/date-utils";
+import {
+  saveEvent,
+  updateDateByAllDayICS,
+  validateEventData,
+} from "@/lib/supabase-helpers";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
 
 export function PassModal({
   isOpen,
@@ -32,14 +44,14 @@ export function PassModal({
     rok_observed: false,
     katusa_observed: false,
     usfk_only: false,
-  })
+  });
 
-  const supabase = supabaseClient
+  const supabase = supabaseClient;
 
   useEffect(() => {
     if (pass && isEditing) {
-      const startDate = new Date(pass.date)
-      const endDate = new Date(pass.end_date)
+      const startDate = new Date(pass.date);
+      const endDate = new Date(pass.end_date);
 
       setFormData({
         year: startDate.getFullYear(),
@@ -53,9 +65,9 @@ export function PassModal({
         rok_observed: pass.rok_observed,
         katusa_observed: pass.katusa_observed,
         usfk_only: pass.usfk_only,
-      })
+      });
     } else {
-      const now = new Date()
+      const now = new Date();
       setFormData({
         year: now.getFullYear(),
         month: now.getMonth() + 1,
@@ -68,53 +80,77 @@ export function PassModal({
         rok_observed: false,
         katusa_observed: false,
         usfk_only: false,
-      })
+      });
     }
-  }, [pass, isEditing, isOpen])
+  }, [pass, isEditing, isOpen]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
-    })
-  }
+    });
+  };
 
   const handleToggle = (field) => {
     setFormData({
       ...formData,
       [field]: !formData[field],
-    })
-  }
+    });
+  };
 
   const savePass = async () => {
-    if (!formData.title.trim()) {
-      toast.error("제목을 입력해주세요.")
-      return
-    }
-
     try {
-      const startDate = new Date(formData.year, formData.month - 1, formData.day, 0, 0, 0)
-      const endDate = new Date(formData.endYear, formData.endMonth - 1, formData.endDay, 23, 59, 59)
+      // 날짜 유효성 검사
+      const startDate = new Date(
+        formData.year,
+        formData.month - 1,
+        formData.day
+      );
+      const endDate = new Date(
+        formData.endYear,
+        formData.endMonth - 1,
+        formData.endDay
+      );
 
-      if (endDate < startDate) {
-        toast.error("종료 날짜는 시작 날짜보다 이후여야 합니다.")
-        return
+      const { isValid, reason } = validateEventData({
+        title: formData.title,
+        start_at: startDate.toISOString().split("T")[0],
+        end_at: endDate.toISOString().split("T")[0],
+      });
+
+      if (!isValid) {
+        toast.error(reason);
+        return;
       }
 
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        toast.error("유효하지 않은 날짜입니다.")
-        return
-      }
+      // YYYY-MM-DD 형식으로 변환
+      // const rawStart = startDate.toISOString().split("T")[0];
+      // const rawEnd = endDate.toISOString().split("T")[0];
 
-      const events = []
+      console.log("Saving pass:", {
+        title: formData.title,
+        start_at: startDate,
+        end_at: endDate,
+      });
+
+      // 📌 ICS 규칙에 맞게 종료일 보정
+      // const { start_at: adjustedStart, end_at: adjustedEnd } = updateDateByAllDayICS(rawStart, rawEnd);
+
+      const startISO = convertAllDayToUTC(startDate)
+      const endISO = convertAllDayEndToUTC(endDate)
+
+      const events = [];
 
       // 기존 이벤트 삭제 (수정 모드인 경우)
       if (isEditing && pass) {
         if (pass.events && pass.events.length > 0) {
-          const eventIds = pass.events.map((event) => event.id)
-          const { error: deleteError } = await supabase.from("events").delete().in("id", eventIds)
-          if (deleteError) throw deleteError
+          const eventIds = pass.events.map((event) => event.id);
+          const { error: deleteError } = await supabase
+            .from("events")
+            .delete()
+            .in("id", eventIds);
+          if (deleteError) throw deleteError;
         }
       }
 
@@ -122,92 +158,102 @@ export function PassModal({
       if (formData.us_observed) {
         events.push({
           title: formData.title,
-          start_at: startDate.toISOString(),
-          end_at: endDate.toISOString(),
+          start_at: startISO,
+          end_at: endISO,
           category: "us-holiday",
           all_day: true,
           is_usfk: false,
           created_at: new Date().toISOString(),
-        })
+        });
       }
 
       if (formData.rok_observed) {
         events.push({
           title: formData.title,
-          start_at: startDate.toISOString(),
-          end_at: endDate.toISOString(),
+          start_at: startISO,
+          end_at: endISO,
           category: "korean-army",
           all_day: true,
           is_usfk: false,
           created_at: new Date().toISOString(),
-        })
+        });
       }
 
       if (formData.katusa_observed) {
         events.push({
           title: formData.title,
-          start_at: startDate.toISOString(),
-          end_at: endDate.toISOString(),
+          start_at: startISO,
+          end_at: endISO,
           category: "basic",
           all_day: true,
           is_usfk: false,
           created_at: new Date().toISOString(),
-        })
+        });
       }
 
       if (formData.usfk_only) {
         events.push({
           title: `${formData.title} (USFK Only)`,
-          start_at: startDate.toISOString(),
-          end_at: endDate.toISOString(),
+          start_at: startISO,
+          end_at: endISO,
           category: "basic",
           all_day: true,
           is_usfk: true,
           created_at: new Date().toISOString(),
-        })
+        });
       }
 
       if (events.length > 0) {
-        const { error: insertError } = await supabase.from("events").insert(events)
-        if (insertError) throw insertError
+        for (const event of events) {
+          const { error: insertError } = await saveEvent(event, event.category);
+          if (insertError) throw insertError;
+        }
       }
 
       toast.success(
-        isEditing ? "휴일이 수정되었습니다." : "새 휴일이 추가되었습니다."
-      )
-      onSaveSuccess()
+        isEditing ? "패스가 수정되었습니다." : "패스가 추가되었습니다."
+      );
+      onSaveSuccess?.();
+      onClose();
     } catch (error) {
-      console.error("Error saving pass:", error)
-      toast.error("휴일 저장 중 오류가 발생했습니다.")
+      console.error("Error saving pass:", error);
+      toast.error("패스 저장 중 오류가 발생했습니다.");
     }
-  }
+  };
 
   const deleteHoliday = async () => {
-    if (!pass) return
-    if (!window.confirm("정말로 이 휴일을 삭제하시겠습니까?")) return
+    if (!pass) return;
+    if (!window.confirm("정말로 이 휴일을 삭제하시겠습니까?")) return;
 
     try {
       if (pass.events && pass.events.length > 0) {
-        const eventIds = pass.events.map((event) => event.id)
-        const { error: deleteError } = await supabase.from("events").delete().in("id", eventIds)
-        if (deleteError) throw deleteError
+        const eventIds = pass.events.map((event) => event.id);
+        const { error: deleteError } = await supabase
+          .from("events")
+          .delete()
+          .in("id", eventIds);
+        if (deleteError) throw deleteError;
       }
 
-      toast.success("휴일이 삭제되었습니다.")
-      onDeleteSuccess()
+      toast.success("휴일이 삭제되었습니다.");
+      onDeleteSuccess();
     } catch (error) {
-      console.error("Error deleting pass:", error)
-      toast.error("휴일 삭제 중 오류가 발생했습니다.")
+      console.error("Error deleting pass:", error);
+      toast.error("휴일 삭제 중 오류가 발생했습니다.");
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}>
+      <DialogContent
+        className={
+          theme === "dark"
+            ? "bg-gray-900 border-gray-700"
+            : "bg-white border-gray-200"
+        }
+      >
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "패스 수정" : "새 패스 추가"}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? "패스 수정" : "새 패스 추가"}</DialogTitle>
         </DialogHeader>
 
         <DialogDescription>
@@ -358,7 +404,9 @@ export function PassModal({
                 onPressedChange={() => handleToggle("us_observed")}
                 variant="outline"
                 className={
-                  formData.us_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                  formData.us_observed
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : ""
                 }
               >
                 {formData.us_observed ? "Yes" : "No"}
@@ -372,7 +420,9 @@ export function PassModal({
                 onPressedChange={() => handleToggle("rok_observed")}
                 variant="outline"
                 className={
-                  formData.rok_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                  formData.rok_observed
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : ""
                 }
               >
                 {formData.rok_observed ? "Yes" : "No"}
@@ -386,7 +436,9 @@ export function PassModal({
                 onPressedChange={() => handleToggle("katusa_observed")}
                 variant="outline"
                 className={
-                  formData.katusa_observed ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                  formData.katusa_observed
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : ""
                 }
               >
                 {formData.katusa_observed ? "Yes" : "No"}
@@ -400,7 +452,9 @@ export function PassModal({
                 onPressedChange={() => handleToggle("usfk_only")}
                 variant="outline"
                 className={
-                  formData.usfk_only ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""
+                  formData.usfk_only
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : ""
                 }
               >
                 {formData.usfk_only ? "Yes" : "No"}
@@ -428,5 +482,5 @@ export function PassModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

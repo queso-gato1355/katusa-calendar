@@ -56,6 +56,20 @@ export default function EventTable({
     })
   }
 
+  const formatEndDate = (dateString, all_day) => {
+    const date = new Date(dateString)
+    if (all_day) {
+      // 종료일의 종일일정은 하루를 빼야 한다.
+      date.setDate(date.getDate() - 1)
+      return date.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+    }
+    return formatDate(endDate)
+  }
+
   // 페이지네이션 헬퍼 함수들
   const getTotalPages = () => Math.ceil(pagination.total / pagination.perPage) || 1
 
@@ -154,7 +168,7 @@ export default function EventTable({
                   )}
                   <td className="px-4 py-3 text-sm font-medium">{event.title}</td>
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(event.start_at, event.all_day)}</td>
-                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(event.end_at, event.all_day)}</td>
+                  <td className="px-4 py-3 text-sm hidden md:table-cell">{formatEndDate(event.end_at, event.all_day)}</td>
                   <td className="px-4 py-3 text-sm hidden md:table-cell">{event.location || "-"}</td>
                   <td className="px-4 py-3 text-sm text-right">
                     <div className="flex justify-end gap-2">

@@ -19,8 +19,27 @@ export default function HowItWorksSection({ theme, language = "ko" }) {
             </p>
           </div>
         </div>
-        <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 grid-cols-1 md:grid-cols-3">
+        {/* 애플 사용자에게 해당하는 내용 */}
+        <h3 className="mt-12 text-2xl font-semibold text-center">
+          {text.appleUsersTitle}
+        </h3>
+        <p className={`mt-2 text-center ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+          {text.appleUsersDescription}
+        </p>
+        <div className="mx-auto grid max-w-5xl items-top gap-6 py-12 grid-cols-1 md:grid-cols-3">
           {text.steps.map((step, index) => (
+            <StepCard key={index} theme={theme} number={index + 1} title={step.title} description={step.description} />
+          ))}
+        </div>
+        {/* Android 사용자에게 해당하는 내용 */}
+        <h3 className="mt-12 text-2xl font-semibold text-center">
+          {text.androidUsersTitle}
+        </h3>
+        <p className={`mt-2 text-center ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+          {text.androidUsersDescription}
+        </p>
+        <div className="mx-auto grid max-w-5xl items-top gap-6 py-12 grid-cols-1 md:grid-cols-3">
+          {text.androidSteps.map((step, index) => (
             <StepCard key={index} theme={theme} number={index + 1} title={step.title} description={step.description} />
           ))}
         </div>
@@ -40,7 +59,7 @@ function StepCard({ theme, number, title, description }) {
         {number}
       </div>
       <h3 className="text-xl font-bold">{title}</h3>
-      <p className={`${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>{description}</p>
+      <p className={`${theme === "dark" ? "text-gray-400" : "text-gray-500"} break-keep`}>{description}</p>
     </div>
   )
 }

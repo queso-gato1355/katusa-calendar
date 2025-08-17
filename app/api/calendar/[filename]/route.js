@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin"
 export async function GET(request, context) {
   try {
     const { params } = await context
-    const { filename } = params
+    const { filename } = await params
 
     // 파일명에서 캘린더 ID 추출 (예: basic.ics -> basic)
     const calendarId = filename.replace(".ics", "")

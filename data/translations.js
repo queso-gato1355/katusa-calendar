@@ -62,6 +62,24 @@ export const translations = {
           description: "복사한 링크를 Google, Apple, Outlook 등의 캘린더 앱에 추가하세요.",
         },
       ],
+      androidSteps: [
+        {
+          title: "캘린더 선택",
+          description: "소속 부대나 필요한 캘린더를 선택하세요.",
+        },
+        {
+          title: "ICS 파일 다운로드",
+          description: "선택한 캘린더의 ICS 파일을 다운로드 하세요.",
+        },
+        {
+          title: "캘린더 앱에 추가",
+          description: "다운로드한 파일을 누르면 캘린더에 추가할 수 있습니다.",
+        },
+      ],
+      appleUsersTitle: "Apple 사용자에게",
+      appleUsersDescription: "Apple Calendar 앱에서 KATUSA Calendar를 구독하는 방법은 다음과 같습니다.",
+      androidUsersTitle: "Android 사용자에게",
+      androidUsersDescription: "Android 기기에서 KATUSA Calendar를 구독하는 방법은 다음과 같습니다.",
     },
     en: {
       title: "How It Works",
@@ -80,6 +98,24 @@ export const translations = {
           description: "Add the copied link to calendar apps like Google, Apple, Outlook, etc.",
         },
       ],
+      androidSteps: [
+        {
+          title: "Select Calendar",
+          description: "Choose the calendar for your unit or the one you need.",
+        },
+        {
+          title: "Download ICS File",
+          description: "Download the ICS file of the selected calendar.",
+        },
+        {
+          title: "Add to Calendar App",
+          description: "Open the downloaded file to add it to your calendar app.",
+        },
+      ],
+      appleUsersTitle: "For Apple Users",
+      appleUsersDescription: "Here's how to subscribe to KATUSA Calendar in the Apple Calendar app.",
+      androidUsersTitle: "For Android Users",
+      androidUsersDescription: "Here's how to subscribe to KATUSA Calendar on Android devices.",
     },
     es: {
       title: "Cómo funciona",
@@ -98,6 +134,24 @@ export const translations = {
           description: "Añade el enlace copiado a aplicaciones de calendario como Google, Apple, Outlook, etc.",
         },
       ],
+      androidSteps: [
+        {
+          title: "Seleccionar calendario",
+          description: "Elige el calendario para tu unidad o el que necesites.",
+        },
+        {
+          title: "Descargar archivo ICS",
+          description: "Descarga el archivo ICS del calendario seleccionado.",
+        },
+        {
+          title: "Añadir a la aplicación de calendario",
+          description: "Abre el archivo descargado para añadirlo a tu aplicación de calendario.",
+        },
+      ],
+      appleUsersTitle: "Para usuarios de Apple",
+      appleUsersDescription: "Así es como puedes suscribirte al Calendario KATUSA en la aplicación de Calendario de Apple.",
+      androidUsersTitle: "Para usuarios de Android",
+      androidUsersDescription: "Así es como puedes suscribirte al Calendario KATUSA en dispositivos Android.",
     },
   },
 
@@ -356,9 +410,9 @@ export const translations = {
       categories: {
         basic: "카투사 기본",
         kta: "KTA 일정",
-        koreanHoliday: "한국 휴일",
-        koreanArmy: "한국군 휴일",
-        usHoliday: "미군 휴일",
+        "korean-holiday": "한국 휴일",
+        "korean-army": "한국군 휴일",
+        "us-holiday": "미군 휴일",
       },
     },
     en: {
@@ -381,9 +435,9 @@ export const translations = {
       categories: {
         basic: "KATUSA Basic",
         kta: "KTA Schedule",
-        koreanHoliday: "Korean Holidays",
-        koreanArmy: "Korean Army Holidays",
-        usHoliday: "US Military Holidays",
+        "korean-holiday": "Korean Holidays",
+        "korean-army": "Korean Army Holidays",
+        "us-holiday": "US Military Holidays",
       },
     },
     es: {
@@ -406,9 +460,9 @@ export const translations = {
       categories: {
         basic: "KATUSA Básico",
         kta: "Horario KTA",
-        koreanHoliday: "Festivos Coreanos",
-        koreanArmy: "Festivos del Ejército Coreano",
-        usHoliday: "Festivos Militares de EE.UU.",
+        "korean-holiday": "Festivos Coreanos",
+        "korean-army": "Festivos del Ejército Coreano",
+        "us-holiday": "Festivos Militares de EE.UU.",
       },
     },
   },
