@@ -79,21 +79,21 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
 
                 <nav className="flex flex-col gap-4 mt-6">
                   <Link
-                    href="#features"
+                    href="/#features"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
                     기능
                   </Link>
                   <Link
-                    href="#how-it-works"
+                    href="/#how-it-works"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
                     사용방법
                   </Link>
                   <Link
-                    href="#calendars"
+                    href="/#calendars"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
@@ -107,7 +107,7 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
                     웹에서 보기
                   </Link>
                   <Link
-                    href="#faq"
+                    href="/#faq"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
