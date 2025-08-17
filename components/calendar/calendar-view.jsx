@@ -162,7 +162,13 @@ export default function CalendarView({ theme, language = "ko" }) {
     // 각 이벤트에 대해 시작일과 종료일 계산
     events.forEach((event) => {
       const startDate = new Date(event.start_at)
+      // 종료일의 경우, 종일 일정은 하루를 빼고 표기해야 함.
+      // 시작일과 종료일이 같다면 (과거 종일일정 저장 방법이 잘못된 경우가 있었음.)
+      // 그땐 하루를 빼지 않음.
       const endDate = new Date(event.end_at)
+      if (event.all_day && !isSameDay(startDate, endDate)) {
+        endDate.setDate(endDate.getDate() - 1)
+      }
 
       // 시간 정보 제거
       startDate.setHours(0, 0, 0, 0)
