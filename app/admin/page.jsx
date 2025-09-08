@@ -10,7 +10,7 @@ import {
 } from "@/lib/supabase-helpers"
 import { calendarsData } from "@/data/calendars"
 import { getThemeStyles } from "@/data/admin-ui"
-import Sidebar from "@/components/organisms/Admin/AdminSidebar/sidebar"
+import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
 import EventTable from "@/components/organisms/Admin/EventTable/event-table"
 import EventForm from "@/components/admin/event-form"
 import AddButton from "@/components/admin/add-button"
@@ -192,7 +192,7 @@ export default function AdminPage() {
 
   return (
     <div className={`min-h-screen ${styles.container}`}>
-      <Sidebar activeCalendar={activeCalendar} theme={theme} />
+      <AdminSidebar activeCalendar={activeCalendar} theme={theme} />
 
       <div className="md:ml-64 p-4 md:p-8">
         <div className="mb-6">

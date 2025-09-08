@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Sidebar from "@/components/organisms/Admin/AdminSidebar/sidebar"
+import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
 import { supabaseClient } from "@/lib/supabaseClient"
 import { Button } from "@/components/atoms/Button/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/molecules/Cards/card"
@@ -163,7 +163,7 @@ export default function InquiriesPage() {
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-      <Sidebar activeCalendar="inquiries" theme={theme} />
+      <AdminSidebar activeCalendar="inquiries" theme={theme} />
       <div className="md:ml-64 p-4 md:p-8">
         <div className="flex items-top justify-between mb-6">
           <div>

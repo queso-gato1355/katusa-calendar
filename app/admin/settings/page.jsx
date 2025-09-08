@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Sidebar from "@/components/admin/sidebar"
+import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
 import CalendarSettings from "./calendar-settings"
 import toast from "react-hot-toast"
 import { Save } from "lucide-react"
@@ -68,7 +68,7 @@ export default function SettingsPage() {
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-      <Sidebar activeCalendar="settings" theme={theme} />
+      <AdminSidebar activeCalendar="settings" theme={theme} />
 
       <div className="md:ml-64 p-4 md:p-8">
         <div className="mb-6">

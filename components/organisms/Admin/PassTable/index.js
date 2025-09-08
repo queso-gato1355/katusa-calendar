@@ -1,0 +1,1 @@
+export { PassTable } from './pass-table'

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Sidebar from "@/components/admin/sidebar"
-import AdminUserModal from "@/components/admin/admin-user-modal"
+import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
+import AdminUserModal from "@/components/organisms/Admin/AdminUserModal/admin-user-modal"
 import toast from "react-hot-toast"
 import { UserPlus, Edit, User, Shield, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { getCurrentUser, fetchAdminAccounts } from "@/lib/supabase-helpers"
@@ -159,7 +159,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-      <Sidebar activeCalendar="users" theme={theme} />
+      <AdminSidebar activeCalendar="users" theme={theme} />
 
       <div className="md:ml-64 p-4 md:p-8">
         <div className="mb-6 flex justify-between items-center">

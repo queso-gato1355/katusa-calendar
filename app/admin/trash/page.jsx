@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { supabaseClient } from "@/lib/supabaseClient"
-import Sidebar from "@/components/admin/sidebar"
-import EventTable from "@/components/admin/event-table"
+import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
+import EventTable from "@/components/organisms/Admin/EventTable/event-table"
 import toast from "react-hot-toast"
 import { Undo, Trash2 } from "lucide-react"
 import { 
@@ -134,7 +134,7 @@ export default function TrashPage() {
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-      <Sidebar activeCalendar="trash" theme={theme} />
+      <AdminSidebar activeCalendar="trash" theme={theme} />
 
       <div className="md:ml-64 p-4 md:p-8">
         <div className="mb-6">

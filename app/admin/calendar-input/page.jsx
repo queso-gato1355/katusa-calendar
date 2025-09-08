@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { validateAdminSession } from "@/lib/supabase-helpers"
-import Sidebar from "@/components/organisms/Admin/AdminSidebar/sidebar"
+import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
 import FiscalYearForm from "@/components/admin/fiscal-year-form"
 import { getThemeStyles } from "@/data/admin-ui"
 
@@ -75,7 +75,7 @@ export default function CalendarInputPage() {
 
   return (
     <div className={`min-h-screen ${styles.container}`}>
-      <Sidebar activeCalendar="calendar-input" theme={theme} />
+      <AdminSidebar activeCalendar="calendar-input" theme={theme} />
 
       <div className="md:ml-64 p-4 md:p-8">
         <div className="mb-6">

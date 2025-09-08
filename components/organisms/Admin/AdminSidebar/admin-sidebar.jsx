@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
 import UserMenu from "@/components/admin/user-menu"
 
-export default function Sidebar({ activeCalendar, theme }) {
+export default function AdminSidebar({ activeCalendar, theme }) {
   const router = useRouter()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
