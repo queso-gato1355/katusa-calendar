@@ -4,7 +4,7 @@ import { Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/atoms/Button/button"
 import { Badge } from "@/components/atoms/Display/badge"
 import { toast } from "react-hot-toast"
-import { supabaseClient } from "@/lib/supabaseClient"
+import { supabaseClient } from "@/lib/api/supabase/client"
 
 export function PassTable({ passes, loading, selectedPasses, setSelectedPasses, onEdit, theme}) {
 

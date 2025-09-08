@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { supabaseClient } from "@/lib/supabaseClient"
+import { supabaseClient } from "@/lib/api/supabase/client"
 import toast from "react-hot-toast"
-import { getTranslation } from "@/data/translations"
+import { getTranslation } from "@/lib/constants/translations"
 import { formatDate, formatTime, getLocale, isToday, isSameDay } from "@/lib/date-utils"
 import { Button } from "@/components/atoms/Button/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/overlays/Dialog/dialog"
 import { Badge } from "@/components/atoms/Display/badge"
 
 export default function CalendarView({ theme, language = "ko" }) {

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Edit, Trash2, RotateCcw } from "lucide-react"
-import { PaginationControls } from "@/components/ui/pagination-controls"
+import { PaginationControls } from "@/components/molecules/Controls"
 
 export default function EventTable({
   events,

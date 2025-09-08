@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Calendar, Menu, X, ChevronRight, User, LogOut } from "lucide-react"
-import { sidebarMenuItems } from "@/data/admin-ui"
-import { validateAdminSession } from "@/lib/supabase-helpers"
+import { sidebarMenuItems } from "@/lib/constants/admin-ui"
+import { validateAdminSession } from "@/lib/api/supabase/helpers"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
-import UserMenu from "@/components/admin/user-menu"
+import UserMenu from "@/components/organisms/Admin/UserMenu/user-menu"
 
 export default function AdminSidebar({ activeCalendar, theme }) {
   const router = useRouter()

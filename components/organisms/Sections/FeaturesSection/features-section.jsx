@@ -1,5 +1,5 @@
-import { getFeaturesByLanguage } from "@/data/features"
-import { getTranslation } from "@/data/translations"
+import { getFeaturesByLanguage } from "@/lib/constants/features"
+import { getTranslation } from "@/lib/constants/translations"
 
 export default function FeaturesSection({ theme, language = "ko" }) {
   // 현재 언어에 맞는 텍스트 가져오기

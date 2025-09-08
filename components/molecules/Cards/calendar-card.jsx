@@ -10,7 +10,6 @@ export default function CalendarCard({
   downloadICSFile,
   isActive,
   text,
-  language,
 }) {
   // 현재 언어에 맞는 캘린더 제목과 설명 가져오기
   const calendarTranslation = text.calendarItems && text.calendarItems[calendar.id]

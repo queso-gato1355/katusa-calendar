@@ -1,29 +1,32 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useTheme } from "@/components/providers/theme-provider";
 import { useRouter } from "next/navigation"
 import { Calendar, Lock } from "lucide-react"
 import toast from "react-hot-toast"
 
 export default function AdminLoginPage() {
   const router = useRouter()
-  const [theme, setTheme] = useState("light")
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   })
+  const [mounted, setMounted] = useState(false)
 
-  // 테마 설정
+  // 컴포넌트 마운트 확인
   useEffect(() => {
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark")
-      document.documentElement.classList.add("dark")
-    }
-
-    // 이미 로그인되어 있는지 확인
-    checkExistingSession()
+    setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      // 이미 로그인되어 있는지 확인
+      checkExistingSession()
+    }
+  }, [mounted])
 
   const checkExistingSession = () => {
     const cookies = document.cookie.split(";").reduce((acc, cookie) => {

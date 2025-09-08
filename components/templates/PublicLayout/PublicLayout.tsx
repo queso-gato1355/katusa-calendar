@@ -1,11 +1,11 @@
 "use client"
 
 import { ReactNode, useState, useEffect } from "react"
-import { useTheme } from "next-themes"
-import { Header, Footer } from "@/components/organisms/Layout"
-import { Toaster } from "@/components/atoms/Feedback/toaster"
-import { ThemeProvider } from "@/components/providers/theme-provider"
-import { getDefaultLanguage } from "@/data/languages"
+import { useTheme } from "@/components/providers/theme-provider"
+import Header from "@/components/organisms/Layout/Header/header"
+import Footer from "@/components/organisms/Layout/Footer/footer"
+import { Toaster } from "react-hot-toast"
+import { getDefaultLanguage } from "@/lib/constants/languages"
 
 interface PublicLayoutProps {
   children: ReactNode
@@ -15,7 +15,7 @@ interface PublicLayoutProps {
   initialLanguage?: string
 }
 
-function PublicLayoutContent({
+export function PublicLayout({
   children, 
   showHeader = true,
   showFooter = true,
@@ -28,6 +28,12 @@ function PublicLayoutContent({
 
   useEffect(() => {
     setMounted(true)
+    
+    // 저장된 언어 설정 로드
+    const savedLanguage = localStorage.getItem("language")
+    if (savedLanguage) {
+      setLanguage(savedLanguage)
+    }
   }, [])
 
   const handleThemeChange = () => {
@@ -36,6 +42,7 @@ function PublicLayoutContent({
 
   const handleLanguageChange = (langCode: string) => {
     setLanguage(langCode)
+    localStorage.setItem("language", langCode)
   }
 
   if (!mounted) {
@@ -43,7 +50,7 @@ function PublicLayoutContent({
   }
 
   return (
-    <div className={`min-h-screen bg-background flex flex-col ${className}`}>
+    <div className={`min-h-screen bg-background flex flex-col ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
       {/* 헤더 */}
       {showHeader && (
         <Header 
@@ -68,15 +75,7 @@ function PublicLayoutContent({
       )}
       
       {/* 토스트 알림 */}
-      <Toaster />
+      <Toaster position="top-center" reverseOrder={false}/>
     </div>
-  )
-}
-
-export function PublicLayout(props: PublicLayoutProps) {
-  return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <PublicLayoutContent {...props} />
-    </ThemeProvider>
   )
 }

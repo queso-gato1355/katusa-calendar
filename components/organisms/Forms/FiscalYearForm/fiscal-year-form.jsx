@@ -12,17 +12,17 @@ import { Label } from "@/components/atoms/Form/label"
 
 // 함수 & 훅
 import { getDayOfWeek, generateYearOptions } from "@/lib/date-utils"
-import { regenerateICSFiles } from "@/services/ics-service"
+import { regenerateICSFiles } from "@/lib/services/ics"
 import { usePagination } from "@/hooks/use-pagination"
 import { useFilter } from "@/hooks/use-filter"
 import { 
   fetchEventsByCategoryWithFlexibleQuery, 
   softDeleteEventsByCategory,
   softDeleteEvents
-} from "@/lib/supabase-helpers"
+} from "@/lib/api/supabase/helpers"
 
 // 컴포넌트
-import { PaginationControls } from "@/components/ui/pagination-controls"
+import { PaginationControls } from "@/components/molecules/Controls"
 import { PassModal } from "../PassModal/pass-modal"
 import { PassTable } from "../../Admin/PassTable/pass-table"
 

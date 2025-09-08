@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabaseAdmin"
+import { supabaseAdmin } from "@/lib/api/supabase/admin"
 import { hashPassword } from "@/lib/admin-auth"
 
 export async function POST(request) {

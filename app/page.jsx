@@ -1,30 +1,30 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Header from "@/components/layout/header"
-import Footer from "@/components/layout/footer"
-import HeroSection from "@/components/sections/hero-section"
-import FeaturesSection from "@/components/sections/features-section"
-import HowItWorksSection from "@/components/sections/how-it-works-section"
-import CalendarsSection from "@/components/sections/calendars-section"
-import FaqSection from "@/components/sections/faq-section"
-import { supabaseClient } from "@/lib/supabaseClient"
+import { useTheme } from "@/components/providers/theme-provider"
+import {
+  HeroSection,
+  FeaturesSection,
+  HowItWorksSection,
+  CalendarsSection,
+  FaqSection
+} from "@/components/organisms/Sections"
+import { supabaseClient } from "@/lib/api/supabase/client"
 
 export default function Home() {
-  const router = useRouter()
-  const [theme, setTheme] = useState("light")
+  const { theme, setTheme } = useTheme()
   const [language, setLanguage] = useState("ko")
   const [calendarStatus, setCalendarStatus] = useState({})
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
-  // 테마 설정
+  // 컴포넌트 마운트 확인
   useEffect(() => {
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark")
-      document.documentElement.classList.add("dark")
-    }
+    setMounted(true)
+  }, [])
 
+  // 언어 및 캘린더 상태 설정
+  useEffect(() => {
     // 언어 설정 (기본값: 한국어)
     const savedLanguage = localStorage.getItem("language") || "ko"
     setLanguage(savedLanguage)
@@ -60,50 +60,24 @@ export default function Home() {
     fetchCalendarStatus()
   }, [])
 
-  // 테마 변경 핸들러
-  const handleThemeChange = () => {
-    const newTheme = theme === "light" ? "dark" : "light"
-    setTheme(newTheme)
-
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark")
-    } else {
-      document.documentElement.classList.remove("dark")
-    }
-
-    localStorage.theme = newTheme
-  }
-
-  // 언어 변경 핸들러
-  const handleLanguageChange = (lang) => {
-    setLanguage(lang)
-    localStorage.setItem("language", lang)
+  // 마운트되지 않았으면 아무것도 렌더링하지 않음 (hydration 불일치 방지)
+  if (!mounted) {
+    return null
   }
 
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-      <Header
+    <div className="min-h-screen bg-background text-foreground">
+      <HeroSection theme={theme} language={language} />
+      <FeaturesSection theme={theme} language={language} />
+      <HowItWorksSection theme={theme} language={language} id="how-it-works" />
+      <CalendarsSection
         theme={theme}
-        onThemeChange={handleThemeChange}
         language={language}
-        onLanguageChange={handleLanguageChange}
+        id="calendars"
+        calendarStatus={calendarStatus}
+        loading={loading}
       />
-
-      <main>
-        <HeroSection theme={theme} language={language} />
-        <FeaturesSection theme={theme} language={language} />
-        <HowItWorksSection theme={theme} language={language} id="how-it-works" />
-        <CalendarsSection
-          theme={theme}
-          language={language}
-          id="calendars"
-          calendarStatus={calendarStatus}
-          loading={loading}
-        />
-        <FaqSection theme={theme} language={language} />
-      </main>
-
-      <Footer theme={theme} language={language} />
+      <FaqSection theme={theme} language={language} />
     </div>
   )
 }

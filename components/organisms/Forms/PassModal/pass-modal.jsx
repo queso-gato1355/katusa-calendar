@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import { Trash2, Check } from "lucide-react";
 import toast from "react-hot-toast";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/api/supabase/client";
 import { getDayOfWeek, convertAllDayToUTC, convertAllDayEndToUTC } from "@/lib/date-utils";
 import {
   saveEvent,
   updateDateByAllDayICS,
   validateEventData,
-} from "@/lib/supabase-helpers";
+} from "@/lib/api/supabase/helpers";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/components/overlays/Dialog/dialog";
 import { Input } from "@/components/atoms/Input/input";
 import { Label } from "@/components/atoms/Form/label";
 import { Button } from "@/components/atoms/Button/button";

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ArrowRight, Calendar } from "lucide-react"
-import { getTranslation } from "@/data/translations"
+import { getTranslation } from "@/lib/constants/translations"
 import { useRouter } from "next/navigation"
 
 export default function HeroSection({ theme, language = "ko" }) {

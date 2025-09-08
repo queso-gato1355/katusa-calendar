@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "@/components/providers/theme-provider"
 import Link from "next/link"
-import { supabaseClient } from "@/lib/supabaseClient"
-import { getTranslation } from "@/data/translations"
+import { supabaseClient } from "@/lib/api/supabase/client"
+import { getTranslation } from "@/lib/constants/translations"
 import { ArrowLeft, Send } from "lucide-react"
 import toast from "react-hot-toast"
 
 export default function ContactPage() {
   const router = useRouter()
-  const [theme, setTheme] = useState("light")
+  const { theme } = useTheme()
   const [language, setLanguage] = useState("ko")
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,23 +25,23 @@ export default function ContactPage() {
 
   const supabase = supabaseClient
 
+  // 컴포넌트 마운트 확인
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // 언어 설정
+  useEffect(() => {
+    if (mounted) {
+      const savedLanguage = localStorage.getItem("language")
+      if (savedLanguage) {
+        setLanguage(savedLanguage)
+      }
+    }
+  }, [mounted])
+
   // 현재 언어에 맞는 텍스트 가져오기
   const text = getTranslation("contact", language)
-
-  // 테마 및 언어 설정
-  useEffect(() => {
-    // 테마 설정
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark")
-      document.documentElement.classList.add("dark")
-    }
-
-    // 언어 설정
-    const savedLanguage = localStorage.getItem("language")
-    if (savedLanguage) {
-      setLanguage(savedLanguage)
-    }
-  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -87,15 +89,18 @@ export default function ContactPage() {
     }
   }
 
+  // 마운트되지 않았으면 렌더링하지 않음 (hydration 불일치 방지)
+  if (!mounted) {
+    return null
+  }
+
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
+    <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           <Link
             href="/"
-            className={`inline-flex items-center mb-6 text-sm ${
-              theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-900"
-            }`}
+            className="inline-flex items-center mb-6 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Home
@@ -103,14 +108,10 @@ export default function ContactPage() {
 
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold">{text.title}</h1>
-            <p className={`mt-2 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{text.description}</p>
+            <p className="mt-2 text-muted-foreground">{text.description}</p>
           </div>
 
-          <div
-            className={`rounded-lg border ${
-              theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
-            } shadow-sm p-6`}
-          >
+          <div className="rounded-lg border bg-card shadow-sm p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -124,11 +125,7 @@ export default function ContactPage() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className={`w-full rounded-md border px-3 py-2 ${
-                      theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
+                    className="w-full rounded-md border bg-background border-border text-foreground px-3 py-2"
                     placeholder={text.namePlaceholder}
                   />
                 </div>
@@ -143,11 +140,7 @@ export default function ContactPage() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className={`w-full rounded-md border px-3 py-2 ${
-                      theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
+                    className="w-full rounded-md border bg-background border-border text-foreground px-3 py-2"
                     placeholder={text.emailPlaceholder}
                   />
                 </div>
@@ -164,11 +157,7 @@ export default function ContactPage() {
                   value={formData.subject}
                   onChange={handleChange}
                   required
-                  className={`w-full rounded-md border px-3 py-2 ${
-                    theme === "dark"
-                      ? "bg-gray-800 border-gray-700 text-white"
-                      : "bg-white border-gray-300 text-gray-900"
-                  }`}
+                  className="w-full rounded-md border bg-background border-border text-foreground px-3 py-2"
                   placeholder={text.subjectPlaceholder}
                 />
               </div>
@@ -183,11 +172,7 @@ export default function ContactPage() {
                   value={formData.type}
                   onChange={handleChange}
                   required
-                  className={`w-full rounded-md border px-3 py-2 ${
-                    theme === "dark"
-                      ? "bg-gray-800 border-gray-700 text-white"
-                      : "bg-white border-gray-300 text-gray-900"
-                  }`}
+                  className="w-full rounded-md border bg-background border-border text-foreground px-3 py-2"
                 >
                   <option value="general">{text.types.general}</option>
                   <option value="calendar">{text.types.calendar}</option>
@@ -208,11 +193,7 @@ export default function ContactPage() {
                   onChange={handleChange}
                   required
                   rows={6}
-                  className={`w-full rounded-md border px-3 py-2 ${
-                    theme === "dark"
-                      ? "bg-gray-800 border-gray-700 text-white"
-                      : "bg-white border-gray-300 text-gray-900"
-                  }`}
+                  className="w-full rounded-md border bg-background border-border text-foreground px-3 py-2"
                   placeholder={text.messagePlaceholder}
                 />
               </div>
@@ -221,11 +202,9 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`px-4 py-2 rounded-md flex items-center gap-2 ${
-                    theme === "dark"
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
-                  } ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+                  className={`px-4 py-2 rounded-md flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors ${
+                    loading ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
                 >
                   <Send className="h-4 w-4" />
                   {loading ? "제출 중..." : text.submitButton}

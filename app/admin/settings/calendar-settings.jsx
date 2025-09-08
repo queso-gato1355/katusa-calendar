@@ -5,9 +5,9 @@ import {
   updateCalendarActiveStatus, 
   fetchCalendarSettings, 
   getCalendarStatus
-} from "@/lib/supabase-helpers"
+} from "@/lib/api/supabase/helpers"
 import toast from "react-hot-toast"
-import { regenerateICSFiles } from "@/services/ics-service"
+import { regenerateICSFiles } from "@/lib/services/ics"
 import { Save, RefreshCw } from "lucide-react"
 
 export default function CalendarSettings({ theme }) {

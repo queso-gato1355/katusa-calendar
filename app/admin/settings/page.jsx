@@ -1,29 +1,29 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
+import { useTheme } from "@/components/providers/theme-provider"
 import CalendarSettings from "./calendar-settings"
 import toast from "react-hot-toast"
 import { Save } from "lucide-react"
-import { getContactEmail, updateContactEmail } from "@/lib/supabase-helpers"
+import { getContactEmail, updateContactEmail } from "@/lib/api/supabase/helpers"
 
 export default function SettingsPage() {
-  const [theme, setTheme] = useState("light")
+  const { theme } = useTheme()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [contactEmail, setContactEmail] = useState("")
+  const [mounted, setMounted] = useState(false)
 
-  // 테마 설정
+  // 컴포넌트 마운트 확인
   useEffect(() => {
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark")
-      document.documentElement.classList.add("dark")
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      fetchSettings()
     }
-  }, [])
-
-  useEffect(() => {
-    fetchSettings()
-  }, [])
+  }, [mounted])
 
   // 설정 데이터 가져오기
   const fetchSettings = async () => {
@@ -31,11 +31,6 @@ export default function SettingsPage() {
     try {
       // 연락처 이메일 가져오기
       const emailData = await getContactEmail()
-      if (emailData) {
-        setContactEmail(emailData.value)
-      }
-      if (emailError && emailError.code !== "PGRST116") throw emailError
-
       if (emailData) {
         setContactEmail(emailData.value)
       }
@@ -55,8 +50,6 @@ export default function SettingsPage() {
 
       if (error) throw error
 
-      if (emailError) throw emailError
-
       toast.success("설정이 저장되었습니다.")
     } catch (error) {
       console.error("Error saving settings:", error)
@@ -68,13 +61,7 @@ export default function SettingsPage() {
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-      <AdminSidebar activeCalendar="settings" theme={theme} />
-
       <div className="md:ml-64 p-4 md:p-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">설정</h1>
-          <p className="text-sm text-gray-500 mt-1">캘린더 활성화 상태 및 문의 이메일을 관리합니다.</p>
-        </div>
 
         {loading ? (
           <div className="text-center py-8">로딩 중...</div>

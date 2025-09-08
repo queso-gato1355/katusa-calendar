@@ -4,11 +4,11 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Calendar, Menu, Moon, Sun, Globe, ChevronDown, CalendarPlus } from "lucide-react"
-import { languages, getDefaultLanguage } from "@/data/languages"
-import { getTranslation } from "@/data/translations"
+import { languages, getDefaultLanguage } from "@/lib/constants/languages"
+import { getTranslation } from "@/lib/constants/translations"
 import { Button } from "@/components/atoms/Button/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/overlays/Sheet/sheet"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/overlays/DropdownMenu/dropdown-menu"
 
 export default function Header({ theme, onThemeChange, language, setLanguage }) {
   const [mounted, setMounted] = useState(false)
@@ -83,35 +83,35 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    기능
+                    {headerText.mainFeature}
                   </Link>
                   <Link
                     href="/#how-it-works"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    사용방법
+                    {headerText.howItWorks}
                   </Link>
                   <Link
                     href="/#calendars"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    캘린더
+                    {headerText.calendars}
                   </Link>
                   <Link
                     href="/calendar"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    웹에서 보기
+                    {headerText.viewOnWeb}
                   </Link>
                   <Link
                     href="/#faq"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    FAQ
+                    {headerText.faq}
                   </Link>
                 </nav>
                 <div className="mt-auto pt-8">

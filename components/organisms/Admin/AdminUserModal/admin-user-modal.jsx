@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { X, Save, Trash2 } from "lucide-react"
-import { supabaseClient } from "@/lib/supabaseClient"
+import { supabaseClient } from "@/lib/api/supabase/client"
 import { hashPassword } from "@/lib/admin-auth"
 import toast from "react-hot-toast"
 

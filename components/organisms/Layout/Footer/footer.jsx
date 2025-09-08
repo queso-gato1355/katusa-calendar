@@ -1,5 +1,5 @@
 import { Calendar, Github } from "lucide-react"
-import { getTranslation } from "@/data/translations"
+import { getTranslation } from "@/lib/constants/translations"
 
 export default function Footer({ theme, language = "ko" }) {
   // 현재 언어에 맞는 텍스트 가져오기

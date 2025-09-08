@@ -1,5 +1,7 @@
 "use client"
 
+// TODO: 어떤 계정이 그 일정을 추가했는지도 추가
+
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { 
@@ -7,13 +9,13 @@ import {
   saveEvent, 
   softDeleteEvent,
   softDeleteEvents
-} from "@/lib/supabase-helpers"
-import { calendarsData } from "@/data/calendars"
-import { getThemeStyles } from "@/data/admin-ui"
+} from "@/lib/api/supabase/helpers"
+import { calendarsData } from "@/lib/constants/calendars"
+import { getThemeStyles } from "@/lib/constants/admin-ui"
 import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
 import EventTable from "@/components/organisms/Admin/EventTable/event-table"
-import EventForm from "@/components/admin/event-form"
-import AddButton from "@/components/admin/add-button"
+import EventForm from "@/components/organisms/Admin/EventForm/event-form"
+import AddButton from "@/components/atoms/Buttons/AddButton/add-button"
 import toast from "react-hot-toast"
 
 export default function AdminPage() {

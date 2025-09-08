@@ -1,16 +1,18 @@
 "use client"
 
+// TODO: User를 새로 추가하는 것에서 오류가 발생함. 원인 파악 필요
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
-import AdminUserModal from "@/components/organisms/Admin/AdminUserModal/admin-user-modal"
+import { useTheme } from "@/components/providers/theme-provider"
+import AdminUserModal from "@/components/organisms/Admin/AdminUserModal"
 import toast from "react-hot-toast"
 import { UserPlus, Edit, User, Shield, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
-import { getCurrentUser, fetchAdminAccounts } from "@/lib/supabase-helpers"
+import { getCurrentUser, fetchAdminAccounts } from "@/lib/api/supabase/helpers"
 
 export default function AdminUsersPage() {
   const router = useRouter()
-  const [theme, setTheme] = useState("light")
+  const [theme, setTheme] = useTheme()
   const [loading, setLoading] = useState(true)
   const [adminUsers, setAdminUsers] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
@@ -21,19 +23,19 @@ export default function AdminUsersPage() {
     perPage: 10,
     total: 0,
   })
+  const [mounted, setMounted] = useState(false)
 
-  // 테마 설정
+  // 컴포넌트 마운트 확인
   useEffect(() => {
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark")
-      document.documentElement.classList.add("dark")
-    }
+    setMounted(true)
   }, [])
 
   // 인증 상태 확인
   useEffect(() => {
-    checkCurrentUser()
-  }, [])
+    if (mounted) {
+      checkCurrentUser()
+    }
+  }, [mounted])
 
   const checkCurrentUser = async () => {
     try {
@@ -159,14 +161,9 @@ export default function AdminUsersPage() {
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-      <AdminSidebar activeCalendar="users" theme={theme} />
 
       <div className="md:ml-64 p-4 md:p-8">
         <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">관리자 계정 관리</h1>
-            <p className="text-sm text-gray-500 mt-1">관리자 계정을 생성하고 관리합니다.</p>
-          </div>
 
           {/* 새 관리자 추가 버튼 */}
           <button

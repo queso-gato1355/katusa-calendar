@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/overlays/Dialog/dialog"
 import { Button } from "@/components/atoms/Button/button"
 import { Input } from "@/components/atoms/Input/input"
 import { Label } from "@/components/atoms/Form/label"

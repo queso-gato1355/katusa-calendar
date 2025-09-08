@@ -1,90 +1,79 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { validateAdminSession } from "@/lib/supabase-helpers"
-import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
-import FiscalYearForm from "@/components/admin/fiscal-year-form"
-import { getThemeStyles } from "@/data/admin-ui"
+// TODO: 어떤 계정이 그 일정을 입력했는지도 정보에 추가.
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useTheme } from "@/components/providers/theme-provider";
+import { validateSession } from "@/lib/api/auth";
+import FiscalYearForm from "@/components/organisms/Forms/FiscalYearForm/fiscal-year-form";
 
 export default function CalendarInputPage() {
-  const router = useRouter()
-  const [theme, setTheme] = useState("light")
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const { theme } = useTheme();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
-  // 테마 설정
+  // 컴포넌트 마운트 확인
   useEffect(() => {
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark")
-      document.documentElement.classList.add("dark")
-    }
-  }, [])
+    setMounted(true);
+  }, []);
 
   // 인증 상태 확인
   useEffect(() => {
-    checkAuthentication()
-  }, [])
+    if (mounted) {
+      checkAuthentication();
+    }
+  }, [mounted]);
 
   const checkAuthentication = async () => {
     try {
       // 세션 쿠키에서 토큰 가져오기
       const cookies = document.cookie.split(";").reduce((acc, cookie) => {
-        const [key, value] = cookie.trim().split("=")
-        acc[key] = value
-        return acc
-      }, {})
+        const [key, value] = cookie.trim().split("=");
+        acc[key] = value;
+        return acc;
+      }, {});
 
-      const sessionToken = cookies["admin_session"]
+      const sessionToken = cookies["admin_session"];
 
       if (!sessionToken) {
         // 세션이 없으면 로그인 페이지로 리디렉션
-        router.push("/admin/login")
-        return
+        router.push("/admin/login");
+        return;
       }
 
       // 세션 검증
-      const { isValid } = await validateAdminSession(sessionToken)
+      const user = await validateSession(sessionToken);
 
-      if (!isValid) {
+      if (!user) {
         // 세션이 유효하지 않으면 로그인 페이지로 리디렉션
-        router.push("/admin/login")
-        return
+        router.push("/admin/login");
+        return;
       }
 
       // 인증 성공
-      setIsAuthenticated(true)
-      setLoading(false)
+      setIsAuthenticated(true);
+      setLoading(false);
     } catch (error) {
-      console.error("Authentication error:", error)
-      router.push("/admin/login")
+      console.error("Authentication error:", error);
+      router.push("/admin/login");
     }
-  }
+  };
 
-  // 인증되지 않은 경우 로딩 표시
-  if (loading || !isAuthenticated) {
+  // 마운트되지 않았거나 인증되지 않은 경우 로딩 표시
+  if (!mounted || loading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
-    )
+    );
   }
 
-  // 테마 스타일 가져오기
-  const styles = getThemeStyles(theme)
-
   return (
-    <div className={`min-h-screen ${styles.container}`}>
-      <AdminSidebar activeCalendar="calendar-input" theme={theme} />
-
-      <div className="md:ml-64 p-4 md:p-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">캘린더 입력</h1>
-          <p className="text-sm text-gray-500 mt-1">Fiscal Year 문서를 기반으로 휴일 일정을 입력합니다.</p>
-        </div>
-
-        <FiscalYearForm theme={theme} />
-      </div>
+    <div className="space-y-6">      
+      <FiscalYearForm theme={theme} />
     </div>
-  )
+  );
 }

@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { MessageSquare } from "lucide-react"
-import { calendarsData } from "@/data/calendars"
-import { getTranslation } from "@/data/translations"
-import CalendarCard from "@/components/ui/calendar-card"
-import { useCalendarService } from "@/services/calendar-service"
+import { calendarsData } from "@/lib/constants/calendars"
+import { getTranslation } from "@/lib/constants/translations"
+import CalendarCard from "@/components/molecules/Cards/calendar-card"
+import { useCalendarService } from "@/lib/services/calendar"
 
 export default function CalendarsSection({ theme, language = "ko" }) {
   const [copied, setCopied] = useState({})
@@ -63,7 +63,6 @@ export default function CalendarsSection({ theme, language = "ko" }) {
                 downloadICSFile={(link, id, title) => downloadICSFile(link, id, title)}
                 isActive={isCalendarActive(calendar.id)}
                 text={text}
-                language={language}
               />
             ))}
 

@@ -1,28 +1,59 @@
 "use client"
 
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { AdminSidebar } from "@/components/organisms/Admin/AdminSidebar"
-import { UserMenu } from "@/components/organisms/Admin/UserMenu"
-import { Toaster } from "@/components/atoms/Feedback/toaster"
+import { useTheme } from "@/components/providers/theme-provider"
+import { Toaster } from "react-hot-toast"
+import { calendarsData } from "@/lib/constants/calendars"
 
 interface AdminLayoutProps {
   children: ReactNode
   title?: string
+  description?: string
+  pathname?: string
   showSidebar?: boolean
 }
 
 export function AdminLayout({ 
   children, 
   title,
+  description,
+  pathname,
   showSidebar = true 
 }: AdminLayoutProps) {
+  const { theme } = useTheme()
+  const [activeCalendar, setActiveCalendar] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const calendarParam = searchParams.get("calendar")
+  const activeName: Record<
+    '/admin/users' | '/admin/calendar-input' | '/admin/inquiries' | '/admin/settings' | '/admin/trash',
+    string
+  > = {
+    '/admin/users': "users",
+    '/admin/calendar-input': "calendar-input",
+    '/admin/inquiries': "inquiries",
+    '/admin/settings': "settings",
+    '/admin/trash': "trash",
+  }
+
+  // calendarParam이 calendarsData에 존재하면 activeCalendar로 설정
+  if (calendarParam && calendarParam !== activeCalendar) {
+    setActiveCalendar(calendarParam)
+  } else {
+    const key = pathname as keyof typeof activeName
+    setActiveCalendar(activeName[key] ?? null)
+  }
   return (
     <div className="min-h-screen bg-background">
       <div className="flex h-screen">
         {/* 사이드바 */}
         {showSidebar && (
           <div className="w-64 border-r bg-card">
-            <AdminSidebar />
+            <AdminSidebar 
+              activeCalendar={activeCalendar}
+              theme={theme}
+            />
           </div>
         )}
 
@@ -35,9 +66,11 @@ export function AdminLayout({
                 {title}
               </h1>
             )}
-            <div className="ml-auto">
-              <UserMenu />
-            </div>
+            {description && (
+              <p className="text-sm text-muted-foreground">
+                {description}
+              </p>
+            )}
           </header>
 
           {/* 페이지 콘텐츠 */}
@@ -48,7 +81,7 @@ export function AdminLayout({
       </div>
       
       {/* 토스트 알림 */}
-      <Toaster />
+      <Toaster position="top-center" reverseOrder={false}/>
     </div>
   )
 }
