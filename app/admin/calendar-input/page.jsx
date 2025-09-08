@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { validateAdminSession } from "@/lib/supabase-helpers"
-import Sidebar from "@/components/admin/sidebar"
+import Sidebar from "@/components/organisms/Admin/AdminSidebar/sidebar"
 import FiscalYearForm from "@/components/admin/fiscal-year-form"
 import { getThemeStyles } from "@/data/admin-ui"
 
