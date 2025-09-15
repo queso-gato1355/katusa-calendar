@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { generateCalendarICS } from "@/lib/ics-generator"
+import { generateCalendarICS } from "@/lib/generators/ics"
 import { supabaseServer } from "@/lib/api/supabase/server"
 import { uploadToStorage } from "@/lib/api/supabase/storage"
 
