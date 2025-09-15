@@ -1,12 +1,19 @@
 import { Calendar, Github } from "lucide-react"
-import { getTranslation } from "@/lib/constants/translations"
+import { useTheme } from "@/components/providers/theme-provider"
+import { useLanguage, useTranslation } from "@/components/providers/language-provider"
+import { TextPlaceholder, useTextWithPlaceholder } from "@/components/atoms/Display/TextPlaceholder"
 
-export default function Footer({ theme, language = "ko" }) {
-  // 현재 언어에 맞는 텍스트 가져오기
-  const text = getTranslation("footer", language)
+export default function Footer() {
+  const { theme } = useTheme()
+  const { isChangingLanguage } = useLanguage()
+  const text = useTranslation("footer")
+  
+  // 텍스트 플레이스홀더 훅 사용
+  const copyrightText = useTextWithPlaceholder(text.copyright, isChangingLanguage)
+  const githubText = useTextWithPlaceholder(text.github, isChangingLanguage)
 
   return (
-    <footer className={`w-full border-t py-6 md:py-0 ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
+    <footer className="w-full border-t border-border py-6 md:py-0">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between md:h-24">
           <div className="flex flex-col items-center md:items-start">
@@ -14,13 +21,14 @@ export default function Footer({ theme, language = "ko" }) {
               <Calendar className={`h-6 w-6 ${theme === "dark" ? "text-blue-400" : "text-blue-600"}`} />
               <span className="text-lg font-bold">KATUSA Calendar</span>
             </div>
-            <p
-              className={`text-center md:text-left text-sm leading-loose ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
-            >
-              &copy; {new Date().getFullYear()} KATUSA Calendar. {text.copyright}
-            </p>
+            <div className={`text-center md:text-left text-sm leading-loose ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+              <p>&copy; {new Date().getFullYear()} KATUSA Calendar. </p>
+              <TextPlaceholder isChanging={isChangingLanguage}>
+                {copyrightText}
+              </TextPlaceholder>
+            </div>
           </div>
-          <div className="flex gap-4 mt-4 md:mt-0">
+          {/* {<div className="flex gap-4 mt-4 md:mt-0">
             <a
               href="https://github.com/queso-gato1355/katusa-calendar"
               className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
@@ -30,9 +38,13 @@ export default function Footer({ theme, language = "ko" }) {
               }`}
             >
               <Github className="h-5 w-5" />
-              <span className="text-sm font-medium">{text.github}</span>
+              <span className="text-sm font-medium">
+                <TextPlaceholder isChanging={isChangingLanguage}>
+                  {githubText}
+                </TextPlaceholder>
+              </span>
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

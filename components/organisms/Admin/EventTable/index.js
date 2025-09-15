@@ -1,1 +1,1 @@
-export { EventTable } from './event-table'
+export { default as EventTable } from './event-table'

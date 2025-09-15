@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Trash2, Check } from "lucide-react";
 import toast from "react-hot-toast";
 import { supabaseClient } from "@/lib/api/supabase/client";
-import { getDayOfWeek, convertAllDayToUTC, convertAllDayEndToUTC } from "@/lib/date-utils";
+import { getDayOfWeek, convertAllDayToUTC, convertAllDayEndToUTC } from "@/lib/utils/date";
 import {
   saveEvent,
   updateDateByAllDayICS,

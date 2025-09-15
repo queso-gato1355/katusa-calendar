@@ -1,11 +1,21 @@
 import { getFeaturesByLanguage } from "@/lib/constants/features"
-import { getTranslation } from "@/lib/constants/translations"
+import { useLanguage, useTranslation } from "@/components/providers/language-provider"
+import { useTheme } from "@/components/providers/theme-provider"
+import { TextPlaceholder, useTextWithPlaceholder } from "@/components/atoms/Display/TextPlaceholder"
 
-export default function FeaturesSection({ theme, language = "ko" }) {
+export default function FeaturesSection() {
+  const { theme } = useTheme()
+  const { language, isChangingLanguage } = useLanguage()
+  
   // 현재 언어에 맞는 텍스트 가져오기
-  const text = getTranslation("features", language)
+  const text = useTranslation("features")
   // 현재 언어에 맞는 기능 데이터 가져오기
   const features = getFeaturesByLanguage(language)
+  
+  // 텍스트 플레이스홀더 훅 사용
+  const badgeText = useTextWithPlaceholder(text.badge, isChangingLanguage)
+  const titleText = useTextWithPlaceholder(text.title, isChangingLanguage)
+  const descriptionText = useTextWithPlaceholder(text.description, isChangingLanguage)
 
   return (
     <section
@@ -20,16 +30,24 @@ export default function FeaturesSection({ theme, language = "ko" }) {
                 theme === "dark" ? "bg-blue-600 text-white" : "bg-blue-600 text-white"
               }`}
             >
-              {text.badge}
+              <TextPlaceholder isChanging={isChangingLanguage}>
+                {badgeText}
+              </TextPlaceholder>
             </div>
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">{text.title}</h2>
-            <p
-              className={`max-w-[900px] ${
-                theme === "dark" ? "text-gray-300" : "text-gray-600"
-              } md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed`}
-            >
-              {text.description}
-            </p>
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+              <TextPlaceholder isChanging={isChangingLanguage}>
+                {titleText}
+              </TextPlaceholder>
+            </h2>
+            <TextPlaceholder isChanging={isChangingLanguage}>
+              <p
+                className={`max-w-[900px] ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-600"
+                } md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed`}
+              >
+                {descriptionText}
+              </p>
+            </TextPlaceholder>
           </div>
         </div>
         <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -39,6 +57,7 @@ export default function FeaturesSection({ theme, language = "ko" }) {
               <FeatureCard
                 key={feature.id}
                 theme={theme}
+                isChangingLanguage={isChangingLanguage}
                 icon={
                   <feature.icon className={`h-10 w-10 ${theme === "dark" ? "text-blue-400" : "text-blue-600"} mb-4`} />
                 }
@@ -52,7 +71,10 @@ export default function FeaturesSection({ theme, language = "ko" }) {
   )
 }
 
-function FeatureCard({ theme, icon, title, description }) {
+function FeatureCard({ theme, icon, title, description, isChangingLanguage }) {
+  const titleText = useTextWithPlaceholder(title, isChangingLanguage)
+  const descriptionText = useTextWithPlaceholder(description, isChangingLanguage)
+  
   return (
     <div
       className={`rounded-lg border ${
@@ -61,8 +83,16 @@ function FeatureCard({ theme, icon, title, description }) {
     >
       <div className="flex flex-col space-y-1.5 p-6 flex-grow">
         {icon}
-        <h3 className="text-2xl font-semibold leading-none tracking-tight">{title}</h3>
-        <p className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>{description}</p>
+        <h3 className="text-2xl font-semibold leading-none tracking-tight">
+          <TextPlaceholder isChanging={isChangingLanguage}>
+            {titleText}
+          </TextPlaceholder>
+        </h3>
+        <TextPlaceholder isChanging={isChangingLanguage}>
+          <p className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+            {descriptionText}
+          </p>
+        </TextPlaceholder>
       </div>
     </div>
   )

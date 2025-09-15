@@ -3,34 +3,38 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Calendar, Menu, Moon, Sun, Globe, ChevronDown, CalendarPlus } from "lucide-react"
-import { languages, getDefaultLanguage } from "@/lib/constants/languages"
-import { getTranslation } from "@/lib/constants/translations"
+import { Calendar, Menu, Moon, Sun, CalendarPlus } from "lucide-react"
+import { useTheme } from "@/components/providers/theme-provider"
+import { useIsMobile } from "@/lib/hooks/use-mobile"
+import { useLanguage, useTranslation } from "@/components/providers/language-provider"
+import { LanguageSelector } from "@/components/molecules/Controls/LanguageSelector"
 import { Button } from "@/components/atoms/Button/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/overlays/Sheet/sheet"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/overlays/DropdownMenu/dropdown-menu"
+import { TextPlaceholder, useTextWithPlaceholder } from "@/components/atoms/Display/TextPlaceholder"
 
-export default function Header({ theme, onThemeChange, language, setLanguage }) {
+export default function Header() {
+  const { theme, setTheme } = useTheme()
+  const { language, isClient, isChangingLanguage } = useLanguage()
+  const isMobile = useIsMobile()
+  const text = useTranslation("header")
   const [mounted, setMounted] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter();
+
+  // 텍스트 플레이스홀더 훅 사용
+  const howItWorksText = useTextWithPlaceholder(text.howItWorks, isChangingLanguage)
+  const calendarsText = useTextWithPlaceholder(text.calendars, isChangingLanguage)
+  const viewOnWebText = useTextWithPlaceholder(text.viewOnWeb, isChangingLanguage)
+  const faqText = useTextWithPlaceholder(text.faq, isChangingLanguage)
+  const subscribeButtonText = useTextWithPlaceholder(text.subscribeButton, isChangingLanguage)
 
   // Wait for component to mount to access theme
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const handleLanguageChange = (langCode) => {
-    setLanguage(langCode)
-  }
-
-  // 현재 선택된 언어 정보
-  const currentLanguage = languages.find((lang) => lang.code === language) || getDefaultLanguage()
-
-  // 헤더 번역 가져오기
-  const headerText = getTranslation("header", language)
-
-  if (!mounted) {
+  // SSR 호환성 체크
+  if (!mounted || !isClient) {
     return null
   }
 
@@ -42,7 +46,7 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
           <div className="flex items-center gap-4">
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label={headerText.menuButton}>
+                <Button variant="ghost" size="icon" aria-label={text.menuButton}>
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -58,23 +62,14 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
 
                 {/* Language Selector in Side Menu */}
                 <div className="my-6">
-                  <div className="text-sm font-medium text-muted-foreground mb-2">{headerText.languageSelector}</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {languages.map((lang) => (
-                      <Button
-                        key={lang.code}
-                        variant={lang.code === language ? "default" : "outline"}
-                        className="justify-start"
-                        onClick={() => {
-                          handleLanguageChange(lang.code)
-                          setMenuOpen(false)
-                        }}
-                      >
-                        <span className="text-lg mr-2">{lang.flag}</span>
-                        <span className="text-sm">{lang.name}</span>
-                      </Button>
-                    ))}
-                  </div>
+                  <div className="text-sm font-medium text-muted-foreground mb-2">{text.languageSelector}</div>
+                  <LanguageSelector 
+                    variant="outline" 
+                    size="default" 
+                    align="start"
+                    showFlag={true} 
+                    showText={true}
+                  />
                 </div>
 
                 <nav className="flex flex-col gap-4 mt-6">
@@ -83,35 +78,43 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    {headerText.mainFeature}
+                    {text.mainFeature}
                   </Link>
                   <Link
                     href="/#how-it-works"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    {headerText.howItWorks}
+                    <TextPlaceholder isChanging={isChangingLanguage}>
+                      {howItWorksText}
+                    </TextPlaceholder>
                   </Link>
                   <Link
                     href="/#calendars"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    {headerText.calendars}
+                    <TextPlaceholder isChanging={isChangingLanguage}>
+                      {calendarsText}
+                    </TextPlaceholder>
                   </Link>
                   <Link
                     href="/calendar"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    {headerText.viewOnWeb}
+                    <TextPlaceholder isChanging={isChangingLanguage}>
+                      {viewOnWebText}
+                    </TextPlaceholder>
                   </Link>
                   <Link
                     href="/#faq"
                     className="text-lg font-medium hover:text-primary"
                     onClick={() => setMenuOpen(false)}
                   >
-                    {headerText.faq}
+                    <TextPlaceholder isChanging={isChangingLanguage}>
+                      {faqText}
+                    </TextPlaceholder>
                   </Link>
                 </nav>
                 <div className="mt-auto pt-8">
@@ -122,7 +125,9 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
                       setMenuOpen(false)
                     }}
                   >
-                    {headerText.subscribeButton}
+                    <TextPlaceholder isChanging={isChangingLanguage}>
+                      {subscribeButtonText}
+                    </TextPlaceholder>
                   </Button>
                 </div>
               </SheetContent>
@@ -138,38 +143,25 @@ export default function Header({ theme, onThemeChange, language, setLanguage }) 
           {/* Right section - Buttons */}
           <div className="flex items-center gap-2">
             {/* Language Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 h-10">
-                  <Globe className="h-5 w-5 mr-1" />
-                  <span className="hidden sm:inline-flex items-center gap-1">
-                    <span className="mr-1">{currentLanguage.flag}</span>
-                    {currentLanguage.name}
-                  </span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {languages.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => handleLanguageChange(lang.code)}
-                    className={lang.code === language ? "bg-muted" : ""}
-                  >
-                    <span className="text-lg mr-2">{lang.flag}</span>
-                    <span>{lang.name}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <LanguageSelector 
+              variant="ghost" 
+              size="sm" 
+              showFlag={true} 
+              showText={!isMobile}
+            />
 
             {/* Theme Toggle */}
-            <Button variant="ghost" size="icon" onClick={onThemeChange} aria-label={headerText.themeToggle}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")} 
+              aria-label={text.themeToggle}
+            >
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
-            <Button variant="ghost" className="border rounded-full" onClick={() => document.getElementById("calendars").scrollIntoView({ behavior: "smooth" })}>
-              <span className="hidden md:block">{headerText.subscribeButton}</span>
+            <Button variant="ghost" className="border rounded-full" onClick={() => document.getElementById("calendars")?.scrollIntoView({ behavior: "smooth" })}>
+              <span className="hidden md:block">{text.subscribeButton}</span>
               <span className="md:hidden">
                 <CalendarPlus className="h-5 w-5" />
               </span>

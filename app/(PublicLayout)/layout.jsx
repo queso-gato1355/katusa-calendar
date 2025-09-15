@@ -1,5 +1,5 @@
-import "./globals.css"
-import { ThemeProvider } from "@/components/providers/theme-provider"
+import "@/app/globals.css"
+import { AppProvider } from "@/components/providers/app-provider"
 import { PublicLayout } from "@/components/templates/PublicLayout"
 
 export const metadata = {
@@ -15,11 +15,11 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body>
-        <ThemeProvider>
+        <AppProvider>
           <PublicLayout>
             {children}
           </PublicLayout>
-        </ThemeProvider>
+        </AppProvider>
       </body>
     </html>
   )

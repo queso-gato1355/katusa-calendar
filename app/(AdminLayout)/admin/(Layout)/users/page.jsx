@@ -2,28 +2,32 @@
 
 // TODO: User를 새로 추가하는 것에서 오류가 발생함. 원인 파악 필요
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { useTheme } from "@/components/providers/theme-provider"
-import AdminUserModal from "@/components/organisms/Admin/AdminUserModal"
+import { AdminUserModal } from "@/components/organisms/Admin/AdminUserModal"
+import { usePagination } from "@/lib/hooks/use-pagination"
 import toast from "react-hot-toast"
 import { UserPlus, Edit, User, Shield, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { getCurrentUser, fetchAdminAccounts } from "@/lib/api/supabase/helpers"
 
 export default function AdminUsersPage() {
   const router = useRouter()
-  const [theme, setTheme] = useTheme()
   const [loading, setLoading] = useState(true)
   const [adminUsers, setAdminUsers] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    perPage: 10,
-    total: 0,
-  })
   const [mounted, setMounted] = useState(false)
+  const [count, setCount] = useState(0)
+
+  const {
+    pagination,
+    handlePageChange,
+    handlePerPageChange,
+    setTotal,
+    getTotalPages,
+    getDisplayRange,
+  } = usePagination(10)
 
   // 컴포넌트 마운트 확인
   useEffect(() => {
@@ -39,8 +43,8 @@ export default function AdminUsersPage() {
 
   const checkCurrentUser = async () => {
     try {
-      const user = await getCurrentUser()
-      if (user) {
+      const { data: user, error } = await getCurrentUser()
+      if (user && !error) {
         setCurrentUser({
           id: user.id,
           username: user.username,
@@ -48,12 +52,9 @@ export default function AdminUsersPage() {
           role: user.role,
         })
       } else {
-        setCurrentUser({
-          id: 1, // 기본값 설정
-          username: "guest",
-          nickname: "게스트",
-          role: "guest",
-        })
+        // 인증되지 않은 사용자를 로그인 페이지로 리다이렉트
+        console.error("Authentication failed:", error)
+        router.push("/admin")
       }
     } catch (error) {
       console.error("Error fetching current user:", error)
@@ -62,42 +63,35 @@ export default function AdminUsersPage() {
   }
 
   // 관리자 목록 가져오기
-  useEffect(() => {
-    if (currentUser) {
-      fetchAdminUsers()
-    }
-  }, [currentUser, pagination.page, pagination.perPage])
-
-  const fetchAdminUsers = async () => {
+  const fetchAdminUsers = useCallback(async () => {
+    if (!currentUser) return
+    
     setLoading(true)
     try {
-      const { from, to } = getPaginationRange()
+      const from = (pagination.page - 1) * pagination.perPage
+      const to = from + pagination.perPage - 1
 
-      const { data, count } = await fetchAdminAccounts(from, to)
+      const { success, data, count } = await fetchAdminAccounts(from, to)
 
-      setAdminUsers(data || [])
-      setPagination((prev) => ({ ...prev, total: count || 0 }))
+      if (success) {
+        setAdminUsers(data || [])
+        setTotal(count || 0)
+      } else {
+        throw new Error("Failed to fetch admin accounts")
+      }
     } catch (error) {
       console.error("Error fetching admin users:", error)
       toast.error("관리자 목록을 불러오는 중 오류가 발생했습니다.")
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentUser, pagination.page, pagination.perPage])
 
-  const getPaginationRange = () => {
-    const from = (pagination.page - 1) * pagination.perPage
-    const to = from + pagination.perPage - 1
-    return { from, to }
-  }
-
-  const handlePageChange = (newPage) => {
-    setPagination((prev) => ({ ...prev, page: newPage }))
-  }
-
-  const handlePerPageChange = (newPerPage) => {
-    setPagination({ page: 1, perPage: newPerPage, total: pagination.total })
-  }
+  useEffect(() => {
+    if (currentUser) {
+      fetchAdminUsers()
+    }
+  }, [currentUser, fetchAdminUsers])
 
   const handleAddUser = () => {
     setSelectedUser(null)
@@ -159,18 +153,39 @@ export default function AdminUsersPage() {
     return user.updater.nickname || user.updater.username
   }
 
-  return (
-    <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+  // 마운트되지 않았으면 렌더링하지 않음 (hydration 방지)
+  if (!mounted || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>관리자 목록을 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
 
-      <div className="md:ml-64 p-4 md:p-8">
-        <div className="mb-6 flex justify-between items-center">
+  // 인증되지 않은 사용자 처리
+  if (!currentUser) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p>인증 정보를 확인하는 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen">{/* 기존 theme 조건문 제거 */}
+
+      <div className="p-4 md:p-8">
+        <div className="mb-6 flex justify-between items-center flex-col">
 
           {/* 새 관리자 추가 버튼 */}
           <button
             onClick={handleAddUser}
-            className={`px-4 py-4 md:py-2 flex rounded-full md:rounded-md items-center gap-2 ${
-              theme === "dark" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
+            className="px-4 py-4 md:py-2 flex rounded-full md:rounded-md items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <UserPlus className="h-8 w-8" />
             <span className="hidden md:block">새 관리자 추가</span>
@@ -190,9 +205,7 @@ export default function AdminUsersPage() {
               id="perPage"
               value={pagination.perPage}
               onChange={(e) => handlePerPageChange(Number(e.target.value))}
-              className={`rounded-md border px-2 py-1 text-sm ${
-                theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300 text-gray-900"
-              }`}
+              className="rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
               {[5, 10, 20, 50].map((option) => (
                 <option key={option} value={option}>
@@ -204,12 +217,12 @@ export default function AdminUsersPage() {
         </div>
 
         {/* 관리자 목록 테이블 */}
-        <div className="w-full overflow-hidden rounded-lg border border-inherit">
+        <div className="w-full overflow-hidden rounded-lg border border-border">
           <table className="w-full">
-            <thead className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-50"}`}>
+            <thead className="bg-muted/50">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-medium">사용자명</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">닉네임</th>
+                <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">닉네임</th>
                 <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">역할</th>
                 <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">생성일</th>
                 <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">생성자</th>
@@ -217,7 +230,7 @@ export default function AdminUsersPage() {
                 <th className="px-4 py-3 text-right text-sm font-medium">작업</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-inherit">
+            <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center">
@@ -226,7 +239,7 @@ export default function AdminUsersPage() {
                 </tr>
               ) : adminUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center">
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                     관리자 계정이 없습니다.
                   </td>
                 </tr>
@@ -234,21 +247,21 @@ export default function AdminUsersPage() {
                 adminUsers.map((user) => (
                   <tr
                     key={user.id}
-                    className={`${theme === "dark" ? "hover:bg-gray-800" : "hover:bg-gray-50"} ${
-                      currentUser?.id === user.id ? "bg-blue-50 dark:bg-blue-900/20" : ""
+                    className={`hover:bg-muted/50 transition-colors ${
+                      currentUser?.id === user.id ? "bg-accent/50" : ""
                     }`}
                   >
                     <td className="px-4 py-3 text-sm">
                       <div className="flex items-center">
                         <span className="font-medium">{user.username}</span>
                         {currentUser?.id === user.id && (
-                          <span className="ml-2 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                          <span className="ml-2 text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full">
                             현재 사용자
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm">{user.nickname || "-"}</td>
+                    <td className="px-4 py-3 text-sm hidden md:table-cell">{user.nickname || "-"}</td>
                     <td className="px-4 py-3 text-sm hidden md:table-cell">{getRoleDisplay(user.role)}</td>
                     <td className="px-4 py-3 text-sm hidden md:table-cell">{formatDate(user.created_at)}</td>
                     <td className="px-4 py-3 text-sm hidden md:table-cell">{getCreatorDisplay(user)}</td>
@@ -256,7 +269,8 @@ export default function AdminUsersPage() {
                     <td className="px-4 py-3 text-sm text-right">
                       <button
                         onClick={() => handleEditUser(user)}
-                        className={`p-1 rounded-md ${theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
+                        className="p-1 rounded-md hover:bg-muted transition-colors"
+                        aria-label="사용자 편집"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
@@ -270,60 +284,46 @@ export default function AdminUsersPage() {
 
         {/* Pagination */}
         <div className="flex justify-between items-center mt-4">
-          <div className="text-sm">
-            {pagination.total > 0
-              ? `${(pagination.page - 1) * pagination.perPage + 1}-${Math.min(pagination.page * pagination.perPage, pagination.total)} / ${pagination.total}`
-              : "0 결과"}
+          <div className="text-sm text-muted-foreground">
+            {getDisplayRange()}
           </div>
           <div className="flex gap-1">
             <button
               onClick={() => handlePageChange(1)}
               disabled={pagination.page === 1}
-              className={`p-1 rounded-md ${
-                theme === "dark"
-                  ? "hover:bg-gray-800 disabled:text-gray-700"
-                  : "hover:bg-gray-100 disabled:text-gray-300"
-              } disabled:cursor-not-allowed`}
+              className="p-1 rounded-md hover:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
+              aria-label="첫 페이지"
             >
               <ChevronsLeft className="h-5 w-5" />
             </button>
             <button
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page === 1}
-              className={`p-1 rounded-md ${
-                theme === "dark"
-                  ? "hover:bg-gray-800 disabled:text-gray-700"
-                  : "hover:bg-gray-100 disabled:text-gray-300"
-              } disabled:cursor-not-allowed`}
+              className="p-1 rounded-md hover:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
+              aria-label="이전 페이지"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
 
             <div className="flex items-center px-2">
               <span className="text-sm">
-                {pagination.page} / {Math.ceil(pagination.total / pagination.perPage) || 1}
+                {pagination.page} / {getTotalPages()}
               </span>
             </div>
 
             <button
               onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page >= Math.ceil(pagination.total / pagination.perPage)}
-              className={`p-1 rounded-md ${
-                theme === "dark"
-                  ? "hover:bg-gray-800 disabled:text-gray-700"
-                  : "hover:bg-gray-100 disabled:text-gray-300"
-              } disabled:cursor-not-allowed`}
+              disabled={pagination.page >= getTotalPages()}
+              className="p-1 rounded-md hover:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
+              aria-label="다음 페이지"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
             <button
-              onClick={() => handlePageChange(Math.ceil(pagination.total / pagination.perPage))}
-              disabled={pagination.page >= Math.ceil(pagination.total / pagination.perPage)}
-              className={`p-1 rounded-md ${
-                theme === "dark"
-                  ? "hover:bg-gray-800 disabled:text-gray-700"
-                  : "hover:bg-gray-100 disabled:text-gray-300"
-              } disabled:cursor-not-allowed`}
+              onClick={() => handlePageChange(getTotalPages())}
+              disabled={pagination.page >= getTotalPages()}
+              className="p-1 rounded-md hover:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
+              aria-label="마지막 페이지"
             >
               <ChevronsRight className="h-5 w-5" />
             </button>
@@ -338,7 +338,6 @@ export default function AdminUsersPage() {
         user={selectedUser}
         currentUser={currentUser}
         onSave={handleSaveUser}
-        theme={theme}
       />
     </div>
   )

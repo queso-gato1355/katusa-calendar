@@ -135,19 +135,12 @@ export default function TrashPage() {
   );
 
   return (
-    <div
-      className={`min-h-screen ${
-        theme === "dark"
-          ? "dark bg-gray-900 text-white"
-          : "bg-gray-50 text-gray-900"
-      }`}
-    >
+    <div className="min-h-screen">
 
-      <div className="md:ml-64 p-4 md:p-8">
+      <div className="p-4 md:p-8">
         <EventTable
           events={events}
           loading={loading}
-          theme={theme}
           onEdit={() => {}} // 휴지통에서는 편집 기능 비활성화
           ableToEdit={false} // 편집 기능 비활성화
           ableToRestore={true} // 복원 기능 활성화

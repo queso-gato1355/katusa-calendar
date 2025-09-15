@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactNode, useState } from "react"
+import { ReactNode, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { AdminSidebar } from "@/components/organisms/Admin/AdminSidebar"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -26,6 +26,7 @@ export function AdminLayout({
   const [activeCalendar, setActiveCalendar] = useState<string | null>(null)
   const searchParams = useSearchParams()
   const calendarParam = searchParams.get("calendar")
+  
   const activeName: Record<
     '/admin/users' | '/admin/calendar-input' | '/admin/inquiries' | '/admin/settings' | '/admin/trash',
     string
@@ -37,19 +38,24 @@ export function AdminLayout({
     '/admin/trash': "trash",
   }
 
-  // calendarParam이 calendarsData에 존재하면 activeCalendar로 설정
-  if (calendarParam && calendarParam !== activeCalendar) {
-    setActiveCalendar(calendarParam)
-  } else {
-    const key = pathname as keyof typeof activeName
-    setActiveCalendar(activeName[key] ?? null)
-  }
+  // useEffect를 사용하여 사이드 이펙트 처리
+  useEffect(() => {
+    if (calendarParam && calendarsData.some(cal => cal.type === calendarParam)) {
+      // calendarParam이 유효한 캘린더 타입인 경우
+      setActiveCalendar(calendarParam)
+    } else if (pathname) {
+      // pathname에 따른 기본 활성 상태 설정
+      const key = pathname as keyof typeof activeName
+      const defaultActive = activeName[key] ?? null
+      setActiveCalendar(defaultActive)
+    }
+  }, [calendarParam, pathname]) // 의존성 배열로 변경 감지
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background/50">
       <div className="flex h-screen">
         {/* 사이드바 */}
         {showSidebar && (
-          <div className="w-64 border-r bg-card">
+          <div className="w-0 md:w-64 border-r bg-background/50">
             <AdminSidebar 
               activeCalendar={activeCalendar}
               theme={theme}
@@ -60,7 +66,7 @@ export function AdminLayout({
         {/* 메인 콘텐츠 영역 */}
         <div className="flex-1 flex flex-col">
           {/* 상단 헤더 */}
-          <header className="h-16 border-b bg-card px-6 flex items-center justify-between">
+          <header className="h-20 md:h-16 border-b bg-background/50 px-6 flex flex-col justify-center items-start md:flex-row md:items-center md:justify-between">
             {title && (
               <h1 className="text-2xl font-semibold text-foreground">
                 {title}

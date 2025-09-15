@@ -7,7 +7,7 @@ import { Input } from "@/components/atoms/Input/input"
 import { Label } from "@/components/atoms/Form/label"
 import { Textarea } from "@/components/atoms/Input/textarea"
 import { Checkbox } from "@/components/atoms/Form/checkbox"
-import { formatLocalDateOnly, formatLocalTimeOnly, toISOString, convertAllDayToUTC, convertAllDayEndToUTC } from "@/lib/date-utils"
+import { formatLocalDateOnly, formatLocalTimeOnly, toISOString, convertAllDayToUTC, convertAllDayEndToUTC } from "@/lib/utils/date"
 
 export default function EventForm({ event, isOpen, onClose, onSave, theme = "light" }) {
   const [formData, setFormData] = useState({

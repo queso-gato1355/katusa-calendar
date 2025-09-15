@@ -11,11 +11,9 @@ import {
   softDeleteEvents
 } from "@/lib/api/supabase/helpers"
 import { calendarsData } from "@/lib/constants/calendars"
-import { getThemeStyles } from "@/lib/constants/admin-ui"
-import AdminSidebar from "@/components/organisms/Admin/AdminSidebar/admin-sidebar"
 import EventTable from "@/components/organisms/Admin/EventTable/event-table"
-import EventForm from "@/components/organisms/Admin/EventForm/event-form"
-import AddButton from "@/components/atoms/Buttons/AddButton/add-button"
+import EventForm from "@/components/organisms/Forms/EventForm/event-form"
+import AddButton from "@/components/atoms/Button/add-button"
 import toast from "react-hot-toast"
 
 export default function AdminPage() {
@@ -189,14 +187,9 @@ export default function AdminPage() {
     }
   }
 
-  // 테마 스타일 가져오기
-  const styles = getThemeStyles(theme)
-
   return (
-    <div className={`min-h-screen ${styles.container}`}>
-      <AdminSidebar activeCalendar={activeCalendar} theme={theme} />
-
-      <div className="md:ml-64 p-4 md:p-8">
+    <div className="min-h-screen">
+      <div className="p-4 md:p-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">{currentCalendarInfo.title} 관리</h1>
           <p className="text-sm text-gray-500 mt-1">{currentCalendarInfo.description}</p>

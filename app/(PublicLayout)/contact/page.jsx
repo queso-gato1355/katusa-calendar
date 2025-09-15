@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useTheme } from "@/components/providers/theme-provider"
 import Link from "next/link"
 import { supabaseClient } from "@/lib/api/supabase/client"
 import { getTranslation } from "@/lib/constants/translations"
@@ -11,7 +10,6 @@ import toast from "react-hot-toast"
 
 export default function ContactPage() {
   const router = useRouter()
-  const { theme } = useTheme()
   const [language, setLanguage] = useState("ko")
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -95,7 +93,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           <Link

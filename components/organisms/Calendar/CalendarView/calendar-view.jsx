@@ -4,13 +4,36 @@ import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { supabaseClient } from "@/lib/api/supabase/client"
 import toast from "react-hot-toast"
-import { getTranslation } from "@/lib/constants/translations"
-import { formatDate, formatTime, getLocale, isToday, isSameDay } from "@/lib/date-utils"
+import { formatDate, formatTime, getLocale, isToday, isSameDay } from "@/lib/utils/date"
 import { Button } from "@/components/atoms/Button/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/overlays/Dialog/dialog"
 import { Badge } from "@/components/atoms/Display/badge"
+import { useTheme } from "@/components/providers/theme-provider"
+import { useLanguage, useTranslation } from "@/components/providers/language-provider"
+import { TextPlaceholder, useTextWithPlaceholder } from "@/components/atoms/Display/TextPlaceholder"
 
-export default function CalendarView({ theme, language = "ko" }) {
+export default function CalendarView() {
+  const { theme } = useTheme()
+  const { language, isClient, isChangingLanguage } = useLanguage()
+  const text = useTranslation("calendarPage")
+  
+  // 텍스트 플레이스홀더 훅 사용
+  const todayText = useTextWithPlaceholder(text.today, isChangingLanguage)
+  const yearText = useTextWithPlaceholder(text.year, isChangingLanguage)
+  const categoryText = useTextWithPlaceholder(text.category, isChangingLanguage)
+  const dateText = useTextWithPlaceholder(text.date, isChangingLanguage)
+  const allDayText = useTextWithPlaceholder(text.allDay, isChangingLanguage)
+  const yesText = useTextWithPlaceholder(text.yes, isChangingLanguage)
+  const locationText = useTextWithPlaceholder(text.location, isChangingLanguage)
+  const descriptionText = useTextWithPlaceholder(text.description, isChangingLanguage)
+  
+  // 카테고리 텍스트 플레이스홀더
+  const koreanHolidayText = useTextWithPlaceholder(text.categories?.koreanHoliday || "한국 휴일", isChangingLanguage)
+  const usHolidayText = useTextWithPlaceholder(text.categories?.usHoliday || "미군 휴일", isChangingLanguage)
+  const koreanArmyText = useTextWithPlaceholder(text.categories?.koreanArmy || "한국군 휴일", isChangingLanguage)
+  const ktaText = useTextWithPlaceholder(text.categories?.kta || "KTA 일정", isChangingLanguage)
+  const basicText = useTextWithPlaceholder(text.categories?.basic || "카투사 기본", isChangingLanguage)
+  
   const [currentDate, setCurrentDate] = useState(new Date())
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -18,7 +41,6 @@ export default function CalendarView({ theme, language = "ko" }) {
   const [showEventDetails, setShowEventDetails] = useState(false)
 
   const supabase = supabaseClient
-  const text = getTranslation("calendarPage", language)
 
   useEffect(() => {
     fetchEvents()
@@ -270,25 +292,48 @@ export default function CalendarView({ theme, language = "ko" }) {
     })
   })
 
+  // SSR 호환성: 클라이언트에서만 렌더링
+  if (!isClient) {
+    return (
+      <div className="w-full p-2 flex items-center justify-center min-h-[400px]">
+        <div className="animate-pulse">Loading calendar...</div>
+      </div>
+    )
+  }
+
   return (
-    <div className="w-full">
+    <div className="w-full">{/* p-2는 page에서 관리하도록 제거 */}
       {/* 캘린더 헤더 */}
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center">
         <div className="flex items-center mb-4 sm:mb-0">
           <Button variant="outline" size="icon" onClick={goToPreviousMonth} aria-label={text.previousMonth}>
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <h2 className="text-xl font-semibold mx-4">
-            {currentDate.getFullYear()}
-            {text.year} {getMonthName(currentDate)}
-          </h2>
+          <div className="min-w-32 mx-4 flex justify-center">
+            <h2 className="text-xl font-semibold break-keep">
+              {currentDate.getFullYear()}
+            </h2>
+            <TextPlaceholder 
+              isChanging={isChangingLanguage} 
+              partial={true}
+              className="text-xl font-semibold break-keep"
+            >
+              {yearText}
+            </TextPlaceholder>
+            <p className="w-3"></p>
+            <h2 className="text-xl font-semibold break-keep">
+              {getMonthName(currentDate)}
+            </h2>
+          </div>
           <Button variant="outline" size="icon" onClick={goToNextMonth} aria-label={text.nextMonth}>
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={goToToday}>
-            {text.today}
+            <TextPlaceholder isChanging={isChangingLanguage}>
+              {todayText}
+            </TextPlaceholder>
           </Button>
         </div>
       </div>
@@ -297,23 +342,43 @@ export default function CalendarView({ theme, language = "ko" }) {
       <div className="mb-4 flex flex-wrap gap-2">
         <div className="flex items-center">
           <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
-          <span className="text-xs">{text.categories?.koreanHoliday || "한국 휴일"}</span>
+          <span className="text-xs">
+            <TextPlaceholder isChanging={isChangingLanguage}>
+              {koreanHolidayText}
+            </TextPlaceholder>
+          </span>
         </div>
         <div className="flex items-center">
           <div className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
-          <span className="text-xs">{text.categories?.usHoliday || "미군 휴일"}</span>
+          <span className="text-xs">
+            <TextPlaceholder isChanging={isChangingLanguage}>
+              {usHolidayText}
+            </TextPlaceholder>
+          </span>
         </div>
         <div className="flex items-center">
           <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
-          <span className="text-xs">{text.categories?.koreanArmy || "한국군 휴일"}</span>
+          <span className="text-xs">
+            <TextPlaceholder isChanging={isChangingLanguage}>
+              {koreanArmyText}
+            </TextPlaceholder>
+          </span>
         </div>
         <div className="flex items-center">
           <div className="w-3 h-3 rounded-full bg-purple-500 mr-1"></div>
-          <span className="text-xs">{text.categories?.kta || "KTA 일정"}</span>
+          <span className="text-xs">
+            <TextPlaceholder isChanging={isChangingLanguage}>
+              {ktaText}
+            </TextPlaceholder>
+          </span>
         </div>
         <div className="flex items-center">
           <div className="w-3 h-3 rounded-full bg-blue-500 mr-1"></div>
-          <span className="text-xs">{text.categories?.basic || "카투사 기본"}</span>
+          <span className="text-xs">
+            <TextPlaceholder isChanging={isChangingLanguage}>
+              {basicText}
+            </TextPlaceholder>
+          </span>
         </div>
       </div>
 
@@ -410,11 +475,19 @@ export default function CalendarView({ theme, language = "ko" }) {
           {selectedEvent && (
             <div className="space-y-3 py-4">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{text.category}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  <TextPlaceholder isChanging={isChangingLanguage}>
+                    {categoryText}
+                  </TextPlaceholder>
+                </p>
                 <p>{getCategoryName(selectedEvent.category)}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{text.date}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  <TextPlaceholder isChanging={isChangingLanguage}>
+                    {dateText}
+                  </TextPlaceholder>
+                </p>
                 <p>
                   {formatDate(selectedEvent.start_at, language)}
                   {!selectedEvent.all_day && ` ${formatTime(selectedEvent.start_at, language)}`}
@@ -425,19 +498,35 @@ export default function CalendarView({ theme, language = "ko" }) {
               </div>
               {selectedEvent.all_day && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{text.allDay}</p>
-                  <Badge variant="outline">{text.yes}</Badge>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    <TextPlaceholder isChanging={isChangingLanguage}>
+                      {allDayText}
+                    </TextPlaceholder>
+                  </p>
+                  <Badge variant="outline">
+                    <TextPlaceholder isChanging={isChangingLanguage}>
+                      {yesText}
+                    </TextPlaceholder>
+                  </Badge>
                 </div>
               )}
               {selectedEvent.location && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{text.location}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    <TextPlaceholder isChanging={isChangingLanguage}>
+                      {locationText}
+                    </TextPlaceholder>
+                  </p>
                   <p>{selectedEvent.location}</p>
                 </div>
               )}
               {selectedEvent.description && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{text.description}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    <TextPlaceholder isChanging={isChangingLanguage}>
+                      {descriptionText}
+                    </TextPlaceholder>
+                  </p>
                   <p>{selectedEvent.description}</p>
                 </div>
               )}

@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react"
 import { X, Save, Trash2 } from "lucide-react"
 import { supabaseClient } from "@/lib/api/supabase/client"
-import { hashPassword } from "@/lib/admin-auth"
+import { hashPassword } from "@/lib/api/auth"
+import { useTheme } from "@/components/providers/theme-provider"
 import toast from "react-hot-toast"
 
-export default function AdminUserModal({ isOpen, onClose, user, currentUser, onSave, theme }) {
+export default function AdminUserModal({ isOpen, onClose, user, currentUser, onSave }) {
   const [formData, setFormData] = useState({
     username: "",
     nickname: "",
@@ -16,6 +17,7 @@ export default function AdminUserModal({ isOpen, onClose, user, currentUser, onS
   })
   const [isDeleting, setIsDeleting] = useState(false)
   const [loading, setLoading] = useState(false)
+  const { theme } = useTheme()
 
   // 수정 모드인지 확인
   const isEditMode = !!user
@@ -155,7 +157,7 @@ export default function AdminUserModal({ isOpen, onClose, user, currentUser, onS
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4 overflow-y-auto">
       <div
         className={`w-full max-w-md rounded-lg ${theme === "dark" ? "bg-gray-900" : "bg-white"} shadow-xl max-h-[90vh] overflow-y-auto`}
       >

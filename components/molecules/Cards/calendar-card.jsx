@@ -1,6 +1,7 @@
 "use client"
 
 import { Copy, Check, Download } from "lucide-react"
+import { TextPlaceholder, useTextWithPlaceholder } from "@/components/atoms/Display/TextPlaceholder"
 
 export default function CalendarCard({
   theme,
@@ -10,11 +11,19 @@ export default function CalendarCard({
   downloadICSFile,
   isActive,
   text,
+  isChangingLanguage = false,
 }) {
   // 현재 언어에 맞는 캘린더 제목과 설명 가져오기
   const calendarTranslation = text.calendarItems && text.calendarItems[calendar.id]
   const title = calendarTranslation ? calendarTranslation.title : calendar.title
   const description = calendarTranslation ? calendarTranslation.description : calendar.description
+  
+  // 텍스트 플레이스홀더 훅 사용
+  const titleText = useTextWithPlaceholder(title, isChangingLanguage)
+  const descriptionText = useTextWithPlaceholder(description, isChangingLanguage)
+  const copyButtonText = useTextWithPlaceholder(text.copyButton, isChangingLanguage)
+  const maintenanceButtonText = useTextWithPlaceholder(text.maintenanceButton, isChangingLanguage)
+  const downloadButtonText = useTextWithPlaceholder(text.downloadButton || "ICS 파일 다운로드", isChangingLanguage)
 
   return (
     <div
@@ -23,8 +32,16 @@ export default function CalendarCard({
       } shadow-sm flex flex-col md:h-[220px] lg:h-[240px]`}
     >
       <div className="flex flex-col space-y-1.5 p-6 flex-grow">
-        <h3 className="text-2xl font-semibold leading-none tracking-tight">{title}</h3>
-        <p className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>{description}</p>
+        <h3 className="text-2xl font-semibold leading-none tracking-tight">
+          <TextPlaceholder isChanging={isChangingLanguage}>
+            {titleText}
+          </TextPlaceholder>
+        </h3>
+        <TextPlaceholder isChanging={isChangingLanguage}>
+          <p className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>     
+            {descriptionText}
+          </p>
+        </TextPlaceholder>
       </div>
       <div className="p-6 pt-0 mt-auto space-y-2">
         <button
@@ -47,7 +64,9 @@ export default function CalendarCard({
               <Copy className="mr-2 h-4 w-4" />
             )
           ) : null}
-          {isActive ? text.copyButton : text.maintenanceButton}
+          <TextPlaceholder isChanging={isChangingLanguage}>
+            {isActive ? copyButtonText : maintenanceButtonText}
+          </TextPlaceholder>
         </button>
 
         {/* 다운로드 버튼 - 활성화된 캘린더만 표시 */}
@@ -61,7 +80,9 @@ export default function CalendarCard({
             onClick={() => downloadICSFile(calendar.link, calendar.id, title)}
           >
             <Download className="mr-2 h-4 w-4" />
-            {text.downloadButton || "ICS 파일 다운로드"}
+            <TextPlaceholder isChanging={isChangingLanguage}>
+              {downloadButtonText}
+            </TextPlaceholder>
           </button>
         )}
       </div>

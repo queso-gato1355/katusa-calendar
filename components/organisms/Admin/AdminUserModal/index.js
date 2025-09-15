@@ -1,1 +1,1 @@
-export { AdminUserModal } from './admin-user-modal'
+export { default as AdminUserModal } from './admin-user-modal'

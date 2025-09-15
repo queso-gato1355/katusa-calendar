@@ -26,42 +26,42 @@ export default function SettingsPage() {
   }, [mounted])
 
   // 설정 데이터 가져오기
-  const fetchSettings = async () => {
-    setLoading(true)
-    try {
-      // 연락처 이메일 가져오기
-      const emailData = await getContactEmail()
-      if (emailData) {
-        setContactEmail(emailData.value)
-      }
-    } catch (error) {
-      console.error("Error fetching settings:", error)
-      toast.error("설정을 불러오는 중 오류가 발생했습니다.")
-    } finally {
-      setLoading(false)
-    }
-  }
+  // const fetchSettings = async () => {
+  //   setLoading(true)
+  //   try {
+  //     // 연락처 이메일 가져오기
+  //     const emailData = await getContactEmail()
+  //     if (emailData) {
+  //       setContactEmail(emailData.value)
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching settings:", error)
+  //     toast.error("설정을 불러오는 중 오류가 발생했습니다.")
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  const handleSaveSettings = async () => {
-    setSaving(true)
-    try {
-      // 연락처 이메일 저장
-      const { success, error } = await updateContactEmail(contactEmail)
+  // const handleSaveSettings = async () => {
+  //   setSaving(true)
+  //   try {
+  //     // 연락처 이메일 저장
+  //     const { success, error } = await updateContactEmail(contactEmail)
 
-      if (error) throw error
+  //     if (error) throw error
 
-      toast.success("설정이 저장되었습니다.")
-    } catch (error) {
-      console.error("Error saving settings:", error)
-      toast.error("설정 저장 중 오류가 발생했습니다.")
-    } finally {
-      setSaving(false)
-    }
-  }
+  //     toast.success("설정이 저장되었습니다.")
+  //   } catch (error) {
+  //     console.error("Error saving settings:", error)
+  //     toast.error("설정 저장 중 오류가 발생했습니다.")
+  //   } finally {
+  //     setSaving(false)
+  //   }
+  // }
 
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "dark bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-      <div className="md:ml-64 p-4 md:p-8">
+    <div className="min-h-screen">
+      <div className="p-4 md:p-8">
 
         {loading ? (
           <div className="text-center py-8">로딩 중...</div>
@@ -71,7 +71,7 @@ export default function SettingsPage() {
             <CalendarSettings theme={theme} />
 
             {/* 문의 이메일 설정 섹션 */}
-            <div
+            {/* {<div
               className={`rounded-lg border ${theme === "dark" ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"} p-6`}
             >
               <h2 className="text-xl font-semibold mb-4">문의 이메일 설정</h2>
@@ -97,10 +97,10 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
-            </div>
+            </div>} */}
 
             {/* 저장 버튼 */}
-            <div className="flex justify-center md:justify-end">
+            {/* <div className="flex justify-center md:justify-end">
               <button
                 onClick={handleSaveSettings}
                 disabled={saving}
@@ -114,6 +114,7 @@ export default function SettingsPage() {
                 {saving ? "저장 중..." : "이메일 설정 저장"}
               </button>
             </div>
+            */}
           </div>
         )}
       </div>

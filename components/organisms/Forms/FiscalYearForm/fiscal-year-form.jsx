@@ -11,10 +11,10 @@ import { Input } from "@/components/atoms/Input/input"
 import { Label } from "@/components/atoms/Form/label"
 
 // 함수 & 훅
-import { getDayOfWeek, generateYearOptions } from "@/lib/date-utils"
+import { getDayOfWeek, generateYearOptions } from "@/lib/utils/date"
 import { regenerateICSFiles } from "@/lib/services/ics"
-import { usePagination } from "@/hooks/use-pagination"
-import { useFilter } from "@/hooks/use-filter"
+import { usePagination } from "@/lib/hooks/use-pagination"
+import { useFilter } from "@/lib/hooks/use-filter"
 import { 
   fetchEventsByCategoryWithFlexibleQuery, 
   softDeleteEventsByCategory,

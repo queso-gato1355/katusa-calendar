@@ -98,6 +98,11 @@ export default function AdminLoginPage() {
     }
   }
 
+  // 마운트되지 않았으면 렌더링하지 않음 (hydration 불일치 방지)
+  if (!mounted) {
+    return null
+  }
+
   return (
     <div
       className={`min-h-screen flex items-center justify-center ${

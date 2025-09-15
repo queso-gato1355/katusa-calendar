@@ -3,16 +3,27 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ArrowRight, Calendar } from "lucide-react"
-import { getTranslation } from "@/lib/constants/translations"
+import { useLanguage, useTranslation } from "@/components/providers/language-provider"
+import { useTheme } from "@/components/providers/theme-provider"
+import { TextPlaceholder, useTextWithPlaceholder } from "@/components/atoms/Display/TextPlaceholder"
 import { useRouter } from "next/navigation"
 
-export default function HeroSection({ theme, language = "ko" }) {
+export default function HeroSection() {
   const router = useRouter()
+  const { theme } = useTheme()
+  const { isChangingLanguage } = useLanguage()
   const [currentImage, setCurrentImage] = useState(0)
   const images = ["/KATUSA.jpg", "/KATUSA2.jpg", "/KATUSA3.jpg"]
 
   // 현재 언어에 맞는 텍스트 가져오기
-  const text = getTranslation("hero", language)
+  const text = useTranslation("hero")
+  
+  // 텍스트 플레이스홀더 훅 사용
+  const titleText = useTextWithPlaceholder(text.title, isChangingLanguage)
+  const descriptionText = useTextWithPlaceholder(text.description, isChangingLanguage)
+  const subscribeButtonText = useTextWithPlaceholder(text.subscribeButton, isChangingLanguage)
+  const howToUseButtonText = useTextWithPlaceholder(text.howToUseButton, isChangingLanguage)
+  const seeItOnWebText = useTextWithPlaceholder(text.seeItOnWeb, isChangingLanguage)
 
   // Image rotation effect
   useEffect(() => {
@@ -36,11 +47,15 @@ export default function HeroSection({ theme, language = "ko" }) {
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none whitespace-pre-line">
-                {text.title}
+                <TextPlaceholder isChanging={isChangingLanguage}>
+                  {titleText}
+                </TextPlaceholder>
               </h1>
-              <p className={`max-w-[600px] ${theme === "dark" ? "text-gray-300" : "text-gray-600"} md:text-xl`}>
-                {text.description}
-              </p>
+              <TextPlaceholder isChanging={isChangingLanguage}>
+                <p className={`max-w-[600px] ${theme === "dark" ? "text-gray-300" : "text-gray-600"} md:text-xl`}>
+                  {descriptionText}
+                </p>
+              </TextPlaceholder>
             </div>
             <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2">
               {/* 파란색 버튼 */}
@@ -52,7 +67,9 @@ export default function HeroSection({ theme, language = "ko" }) {
                 }`}
                 onClick={() => document.getElementById("calendars").scrollIntoView({ behavior: "smooth" })}
               >
-                {text.subscribeButton}
+                <TextPlaceholder isChanging={isChangingLanguage}>
+                  {subscribeButtonText}
+                </TextPlaceholder>
                 <ArrowRight className="ml-2 h-4 w-4" />
               </button>
 
@@ -65,7 +82,9 @@ export default function HeroSection({ theme, language = "ko" }) {
                 }`}
                 onClick={() => document.getElementById("how-it-works").scrollIntoView({ behavior: "smooth" })}
               >
-                {text.howToUseButton}
+                <TextPlaceholder isChanging={isChangingLanguage}>
+                  {howToUseButtonText}
+                </TextPlaceholder>
               </button>
 
               {/* 초록색 버튼 */}
@@ -77,7 +96,10 @@ export default function HeroSection({ theme, language = "ko" }) {
                 } sm:col-span-2`}
                 onClick={() => router.push("/calendar")}
               >
-                <Calendar className="mr-2 h-4 w-4" />웹 달력 보기
+                <Calendar className="mr-2 h-4 w-4" />
+                <TextPlaceholder isChanging={isChangingLanguage}>
+                  {seeItOnWebText}
+                </TextPlaceholder>
               </button>
             </div>
           </div>

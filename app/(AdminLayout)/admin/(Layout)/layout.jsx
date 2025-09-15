@@ -1,6 +1,8 @@
 "use client"
 
+import "@/app/globals.css"
 import { AdminLayout } from "@/components/templates"
+import { AppProvider } from "@/components/providers/app-provider"
 import { usePathname } from "next/navigation"
 
 const getTitleFromPath = (pathname) => {
@@ -27,6 +29,18 @@ export default function AdminRootLayout({ children }) {
   const pathname = usePathname()
   const { title, description } = getTitleFromPath(pathname)
 
-  // TODO: TOO MANY RERENDERS - 원인 파악 필요
-  return <AdminLayout title={title} description={description} pathname={pathname}>{children}</AdminLayout>
+  return (
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
+      <body>
+        <AppProvider>
+          <AdminLayout title={title} description={description} pathname={pathname}>
+            {children}
+          </AdminLayout>
+        </AppProvider>
+      </body>
+    </html>
+  )
 }
