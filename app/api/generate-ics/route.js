@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import { generateCalendarICS } from "@/lib/ics-generator"
-import { supabaseServer } from "@/lib/supabaseServer"
-import { uploadToStorage } from "@/lib/supabase-storage"
+import { generateCalendarICS } from "@/lib/generators/ics"
+import { supabaseServer } from "@/lib/api/supabase/server"
+import { uploadToStorage } from "@/lib/api/supabase/storage"
 
 // Supabase 클라이언트 생성 (서버 측)
 const supabase = supabaseServer

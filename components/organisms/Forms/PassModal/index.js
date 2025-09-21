@@ -1,0 +1,1 @@
+export { PassModal } from './pass-modal'
