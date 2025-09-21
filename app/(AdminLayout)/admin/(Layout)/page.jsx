@@ -16,6 +16,8 @@ import EventForm from "@/components/organisms/Forms/EventForm/event-form"
 import AddButton from "@/components/atoms/Button/add-button"
 import toast from "react-hot-toast"
 
+// TODO: useSearchParams() should be wrapped in a suspense boundary at page 오류 발생
+//       이 파일이 아닐지도 모르지만 문제 해결 필요 (문제 발생은 adminUserPage 빌드 중 발생)
 export default function AdminPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -77,8 +79,6 @@ export default function AdminPage() {
         orderBy: "start_at",
         ascending: false,
       })
-
-      console.log("Fetched events:", data, "Count:", count)
 
       setEvents(data || [])
       setPagination((prev) => ({ ...prev, total: count || 0 }))

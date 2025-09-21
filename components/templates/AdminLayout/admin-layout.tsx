@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactNode, useState, useEffect } from "react"
+import { ReactNode, useState, useEffect, Suspense, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import { AdminSidebar } from "@/components/organisms/Admin/AdminSidebar"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -15,15 +15,14 @@ interface AdminLayoutProps {
   showSidebar?: boolean
 }
 
-export function AdminLayout({ 
-  children, 
-  title,
-  description,
-  pathname,
-  showSidebar = true 
-}: AdminLayoutProps) {
-  const { theme } = useTheme()
-  const [activeCalendar, setActiveCalendar] = useState<string | null>(null)
+// SearchParams를 사용하는 별도 컴포넌트
+function SearchParamsHandler({ 
+  pathname, 
+  onActiveCalendarChange 
+}: { 
+  pathname?: string
+  onActiveCalendarChange: (calendar: string | null) => void 
+}) {
   const searchParams = useSearchParams()
   const calendarParam = searchParams.get("calendar")
   
@@ -38,20 +37,47 @@ export function AdminLayout({
     '/admin/trash': "trash",
   }
 
-  // useEffect를 사용하여 사이드 이펙트 처리
   useEffect(() => {
     if (calendarParam && calendarsData.some(cal => cal.type === calendarParam)) {
       // calendarParam이 유효한 캘린더 타입인 경우
-      setActiveCalendar(calendarParam)
+      onActiveCalendarChange(calendarParam)
     } else if (pathname) {
       // pathname에 따른 기본 활성 상태 설정
       const key = pathname as keyof typeof activeName
       const defaultActive = activeName[key] ?? null
-      setActiveCalendar(defaultActive)
+      onActiveCalendarChange(defaultActive)
     }
-  }, [calendarParam, pathname]) // 의존성 배열로 변경 감지
+  }, [calendarParam, pathname, onActiveCalendarChange])
+
+  return null
+}
+
+// TODO: useSearchParams() should be wrapped in a suspense boundary at page 오류 발생
+//       이 파일이 아닐지도 모르지만 문제 해결 필요 (문제 발생은 adminUserPage 빌드 중 발생)
+export function AdminLayout({ 
+  children, 
+  title,
+  description,
+  pathname,
+  showSidebar = true 
+}: AdminLayoutProps) {
+  const { theme } = useTheme()
+  const [activeCalendar, setActiveCalendar] = useState<string | null>(null)
+
+  const handleActiveCalendarChange = useCallback((calendar: string | null) => {
+    setActiveCalendar(calendar)
+  }, [])
+  
   return (
     <div className="min-h-screen bg-background/50">
+      {/* Suspense로 SearchParams 핸들러 감싸기 */}
+      <Suspense fallback={null}>
+        <SearchParamsHandler 
+          pathname={pathname}
+          onActiveCalendarChange={handleActiveCalendarChange}
+        />
+      </Suspense>
+      
       <div className="flex h-screen">
         {/* 사이드바 */}
         {showSidebar && (

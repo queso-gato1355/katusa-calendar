@@ -3,6 +3,8 @@
 import React from "react"
 import { ThemeProvider } from "./theme-provider"
 import { LanguageProvider } from "./language-provider"
+import { useTheme } from "next-themes"
+import { useLanguage } from "./language-provider"
 
 /**
  * 전체 앱의 Context Providers를 통합 관리하는 컴포넌트
@@ -26,9 +28,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
 // 편의를 위한 통합 훅
 export function useAppContext() {
-  const theme = require("next-themes").useTheme()
-  const language = require("./language-provider").useLanguage()
-  
+  const theme = useTheme()
+  const language = useLanguage()
+
   return {
     ...theme,
     ...language,

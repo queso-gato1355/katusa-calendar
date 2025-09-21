@@ -18,7 +18,6 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [count, setCount] = useState(0)
 
   const {
     pagination,
