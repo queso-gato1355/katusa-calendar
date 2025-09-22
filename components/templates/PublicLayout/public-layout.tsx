@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/providers/language-provider"
 import Header from "@/components/organisms/Layout/Header/header"
 import Footer from "@/components/organisms/Layout/Footer/footer"
 import { Toaster } from "react-hot-toast"
+import BasicLoading from "@/components/molecules/BasicLoading"
 
 interface PublicLayoutProps {
   children: ReactNode
@@ -32,7 +33,7 @@ export function PublicLayout({
   if (!mounted || !isClient) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
+        <BasicLoading />
       </div>
     )
   }

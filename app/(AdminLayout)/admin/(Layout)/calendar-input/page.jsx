@@ -1,6 +1,7 @@
 "use client";
 
 // TODO: 어떤 계정이 그 일정을 입력했는지도 정보에 추가.
+// TODO: Admin 관련되어 대부분의 helper는 API 형태로 받아오도록 수정하기
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
