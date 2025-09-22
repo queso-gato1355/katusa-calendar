@@ -186,8 +186,8 @@ export default function AdminUsersPage() {
             onClick={handleAddUser}
             className="px-4 py-4 md:py-2 flex rounded-full md:rounded-md items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
-            <UserPlus className="h-8 w-8" />
-            <span className="hidden md:block">새 관리자 추가</span>
+            <UserPlus className="h-8 w-8 text-foreground" />
+            <span className="hidden md:block text-foreground">새 관리자 추가</span>
           </button>
         </div>
 

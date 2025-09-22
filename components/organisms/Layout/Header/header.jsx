@@ -54,7 +54,7 @@ export default function Header() {
                 <SheetHeader>
                   <SheetTitle>
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-6 w-6 text-primary" />
+                      <Calendar className="h-6 w-6 text-logo" />
                       <span className="text-xl font-bold">KATUSA Calendar</span>
                     </div>
                   </SheetTitle>
@@ -125,7 +125,7 @@ export default function Header() {
                       setMenuOpen(false)
                     }}
                   >
-                    <TextPlaceholder isChanging={isChangingLanguage}>
+                    <TextPlaceholder isChanging={isChangingLanguage} className="text-foreground">
                       {subscribeButtonText}
                     </TextPlaceholder>
                   </Button>
@@ -134,7 +134,7 @@ export default function Header() {
             </Sheet>
 
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
-              <Calendar className="h-6 w-6 text-primary" />
+              <Calendar className="h-6 w-6 text-logo" />
               <span className="text-xl font-bold hidden md:block">KATUSA Calendar</span>
               <span className="text-xl font-bold md:hidden">KATUSA</span>
             </div>

@@ -3,7 +3,7 @@
 import React from "react"
 import { ThemeProvider } from "./theme-provider"
 import { LanguageProvider } from "./language-provider"
-import { useTheme } from "next-themes"
+import { useTheme } from "./theme-provider"
 import { useLanguage } from "./language-provider"
 
 /**
